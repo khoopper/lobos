@@ -1,0 +1,20 @@
+import { requireRole } from "@/lib/auth/dal";
+import { getSiteSettings } from "@/lib/queries/site-content";
+import { SettingsForm } from "./SettingsForm";
+
+export default async function SettingsPage() {
+  await requireRole(["admin"]);
+  const settings = await getSiteSettings();
+
+  return (
+    <div>
+      <h1 className="text-2xl font-bold text-[var(--gn-palette-3)]">Ajustes del sitio</h1>
+      <p className="mt-1 text-sm text-[var(--gn-palette-5)]">
+        Logos, contacto, redes sociales, colores y textos del pie de página.
+      </p>
+      <div className="mt-6">
+        <SettingsForm initial={settings} />
+      </div>
+    </div>
+  );
+}

@@ -13,7 +13,6 @@ import {
   YoutubeIcon,
 } from "@/components/sites/guianatours-com-co-e923d4eb/shared/icons";
 import type { NavLink, SocialLink } from "@/types/guianatours-com-co-e923d4eb";
-import { ASSETS } from "./content";
 
 const CART_HREF = "https://guianatours.com.co/carrito/";
 const HOME_HREF = "https://guianatours.com.co/";
@@ -26,12 +25,12 @@ const SOCIAL_GLYPH = {
 
 function Logo({ className, logoUrl }: { className?: string; logoUrl: string | null }) {
   return (
-    <a href={HOME_HREF} aria-label="Guía Natours" className={className}>
+    <a href={HOME_HREF} aria-label="Club de Lobos" className={className}>
       <Image
-        src={logoUrl ?? `${ASSETS}/brand/logo-oso.png`}
-        alt="Guía Natours"
-        width={320}
-        height={266}
+        src={logoUrl ?? "/brand/lobos/logo-white-640.png"}
+        alt="Club de Lobos"
+        width={640}
+        height={640}
         priority
         className="block h-auto w-[92px] max-[1024px]:w-[90px]"
       />

@@ -3,12 +3,11 @@ import { createClient } from "@/lib/supabase/server";
 import { CreateUserForm } from "./CreateUserForm";
 
 export default async function UsersPage() {
-  await requireRole(["admin"]);
-  const supabase = await createClient();
-  const { data: profiles } = await supabase
+  const profilesPromise = createClient().then((supabase) => supabase
     .from("profiles")
     .select("id, full_name, role, created_at")
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false }));
+  const [, { data: profiles }] = await Promise.all([requireRole(["admin"]), profilesPromise]);
 
   return (
     <div>

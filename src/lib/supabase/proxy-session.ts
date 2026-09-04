@@ -10,10 +10,8 @@ import type { Database } from "@/lib/supabase/types";
  * `src/lib/auth/dal.ts` and runs inside every protected Server
  * Component/Action/Route Handler instead.
  *
- * Uses `supabase.auth.getUser()`, not `getSession()` — per Supabase's own
- * guidance, `getUser()` revalidates the token against the Supabase Auth
- * server (and refreshes it), whereas `getSession()` only trusts whatever is
- * in the cookie.
+ * Uses `supabase.auth.getClaims()` so the signed JWT can normally be verified
+ * against Supabase's cached public keys without a round trip to Auth.
  */
 export async function refreshSessionAndGuard(request: NextRequest) {
   let response = NextResponse.next({ request });
@@ -35,21 +33,20 @@ export async function refreshSessionAndGuard(request: NextRequest) {
     },
   );
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data, error } = await supabase.auth.getClaims();
+  const authenticated = !error && Boolean(data?.claims?.sub);
 
   const isLoginRoute = request.nextUrl.pathname === "/admin/login";
   const isAdminRoute = request.nextUrl.pathname.startsWith("/admin");
 
-  if (isAdminRoute && !isLoginRoute && !user) {
+  if (isAdminRoute && !isLoginRoute && !authenticated) {
     const url = request.nextUrl.clone();
     url.pathname = "/admin/login";
     url.searchParams.set("next", request.nextUrl.pathname);
     return NextResponse.redirect(url);
   }
 
-  if (isLoginRoute && user) {
+  if (isLoginRoute && authenticated) {
     const url = request.nextUrl.clone();
     url.pathname = "/admin";
     url.search = "";

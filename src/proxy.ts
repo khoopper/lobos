@@ -18,11 +18,6 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: [
-    /*
-     * Run on every route except static assets and image optimization files —
-     * matches the Next.js docs' recommended default matcher.
-     */
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|webp|gif|ico)$).*)",
-  ],
+  // Authentication work is only needed for the administration area.
+  matcher: ["/admin/:path*"],
 };

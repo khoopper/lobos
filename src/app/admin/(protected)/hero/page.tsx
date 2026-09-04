@@ -3,12 +3,11 @@ import { createClient } from "@/lib/supabase/server";
 import { HeroSlidesManager } from "./HeroSlidesManager";
 
 export default async function HeroPage() {
-  await requireRole(["admin"]);
-  const supabase = await createClient();
-  const { data } = await supabase
+  const slidesPromise = createClient().then((supabase) => supabase
     .from("hero_slides")
     .select("id, image_url, image_w, image_h, heading, description, button_label, href, is_published")
-    .order("sort_order");
+    .order("sort_order"));
+  const [, { data }] = await Promise.all([requireRole(["admin"]), slidesPromise]);
 
   return (
     <div>

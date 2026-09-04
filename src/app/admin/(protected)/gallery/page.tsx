@@ -3,12 +3,11 @@ import { createClient } from "@/lib/supabase/server";
 import { GalleryManager } from "./GalleryManager";
 
 export default async function GalleryPage() {
-  await requireRole(["admin"]);
-  const supabase = await createClient();
-  const { data } = await supabase
+  const galleryPromise = createClient().then((supabase) => supabase
     .from("gallery_items")
     .select("id, image_url, image_w, image_h, title, is_published")
-    .order("sort_order");
+    .order("sort_order"));
+  const [, { data }] = await Promise.all([requireRole(["admin"]), galleryPromise]);
 
   return (
     <div>

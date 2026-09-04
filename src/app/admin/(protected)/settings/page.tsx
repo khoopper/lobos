@@ -3,8 +3,7 @@ import { getSiteSettings } from "@/lib/queries/site-content";
 import { SettingsForm } from "./SettingsForm";
 
 export default async function SettingsPage() {
-  await requireRole(["admin"]);
-  const settings = await getSiteSettings();
+  const [, settings] = await Promise.all([requireRole(["admin"]), getSiteSettings()]);
 
   return (
     <div>

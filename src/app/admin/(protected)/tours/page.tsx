@@ -3,14 +3,13 @@ import { createClient } from "@/lib/supabase/server";
 import { ToursManager } from "./ToursManager";
 
 export default async function ToursPage() {
-  await requireRole(["admin"]);
-  const supabase = await createClient();
-  const { data } = await supabase
+  const toursPromise = createClient().then((supabase) => supabase
     .from("tours")
     .select(
       "id, slug, title, price, currency_symbol, departure_start, departure_end, image_url, image_w, image_h, hover_image_url, hover_image_w, hover_image_h, button_label, is_published",
     )
-    .order("sort_order");
+    .order("sort_order"));
+  const [, { data }] = await Promise.all([requireRole(["admin"]), toursPromise]);
 
   return (
     <div>

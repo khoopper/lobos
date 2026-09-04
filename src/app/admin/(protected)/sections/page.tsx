@@ -3,8 +3,7 @@ import { getContentBlocks } from "@/lib/queries/site-content";
 import { SectionsManager } from "./SectionsManager";
 
 export default async function SectionsPage() {
-  await requireRole(["admin"]);
-  const blocks = await getContentBlocks();
+  const [, blocks] = await Promise.all([requireRole(["admin"]), getContentBlocks()]);
 
   return (
     <div>

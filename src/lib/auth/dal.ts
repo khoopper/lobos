@@ -22,17 +22,20 @@ export interface Session {
 export const verifySession = cache(async (): Promise<Session> => {
   const supabase = await createClient();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data, error } = await supabase.auth.getClaims();
+  const claims = data?.claims;
 
-  if (!user) redirect("/admin/login");
+  if (error || !claims?.sub) redirect("/admin/login");
 
-  const { data: profile } = await supabase.from("profiles").select("role").eq("id", user.id).single();
+  const { data: profile } = await supabase.from("profiles").select("role").eq("id", claims.sub).single();
 
   if (!profile) redirect("/admin/login");
 
-  return { userId: user.id, email: user.email ?? null, role: profile.role };
+  return {
+    userId: claims.sub,
+    email: typeof claims.email === "string" ? claims.email : null,
+    role: profile.role,
+  };
 });
 
 /**

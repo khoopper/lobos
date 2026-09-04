@@ -9,13 +9,14 @@ import { BookingsTable, type BookingRow } from "./BookingsTable";
  * action buttons when role !== "admin".
  */
 export default async function BookingsPage() {
-  const session = await requireRole(["admin", "worker"]);
-  const supabase = await createClient();
-
-  const { data, error } = await supabase
+  const bookingsPromise = createClient().then((supabase) => supabase
     .from("bookings")
     .select("id, customer_name, email, phone, requested_date, num_people, status, created_at, tours(title)")
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false }));
+  const [session, { data, error }] = await Promise.all([
+    requireRole(["admin", "worker"]),
+    bookingsPromise,
+  ]);
 
   const bookings: BookingRow[] = (data ?? []).map((b) => ({
     id: b.id,

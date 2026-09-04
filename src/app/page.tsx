@@ -6,6 +6,7 @@ import { CampingSection } from "@/components/sites/guianatours-com-co-e923d4eb/r
 import { ReviewsSection } from "@/components/sites/guianatours-com-co-e923d4eb/root-8a5edab2/ReviewsSection";
 import { FotografiasSemana } from "@/components/sites/guianatours-com-co-e923d4eb/root-8a5edab2/FotografiasSemana";
 import { SiteFooter } from "@/components/sites/guianatours-com-co-e923d4eb/root-8a5edab2/SiteFooter";
+import { CookieNotice } from "@/components/CookieNotice";
 import {
   getContentBlocks,
   getGalleryItems,
@@ -15,6 +16,8 @@ import {
   getSiteSettings,
   getTours,
 } from "@/lib/queries/site-content";
+
+export const revalidate = 3600;
 
 /**
  * Clone of https://guianatours.com.co/ — now backed by Supabase instead of
@@ -85,6 +88,7 @@ export default async function Home() {
         creditLabel={settings.footerCreditLabel}
         creditHref={settings.footerCreditHref}
       />
+      <CookieNotice />
     </div>
   );
 }

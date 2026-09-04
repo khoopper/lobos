@@ -2,8 +2,9 @@
 
 import { useState, useTransition } from "react";
 import { BrandPackageUploader } from "@/components/admin/BrandPackageUploader";
-import { updateSiteSettings } from "./actions";
 import type { SiteSettingsData } from "@/lib/queries/site-content";
+import { findSitePaletteId, SITE_PALETTES, type SitePaletteId } from "@/lib/site-palettes";
+import { applyPalettePreset, updateSiteSettings } from "./actions";
 
 function Field({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
   return <label className="flex min-w-0 flex-col gap-1.5"><span className="text-xs font-bold text-[var(--gn-palette-3)]">{label}</span>{children}{hint ? <span className="text-[11px] leading-4 text-[var(--gn-palette-5)]">{hint}</span> : null}</label>;
@@ -30,10 +31,6 @@ function toFormState(settings: SiteSettingsData): FormState {
   };
 }
 
-function ColorField({ label, value, onChange }: { label: string; value: string; onChange: (value: string) => void }) {
-  return <label className="flex items-center gap-3 rounded-xl border border-[#e5e8e5] p-3"><input type="color" value={value} onChange={(event) => onChange(event.target.value)} className="h-9 w-11 cursor-pointer rounded border-0 bg-transparent" /><span className="min-w-0 flex-1 text-xs font-semibold text-[var(--gn-palette-3)]">{label}</span><span className="font-mono text-[11px] text-[var(--gn-palette-5)]">{value}</span></label>;
-}
-
 function Section({ title, description, children, className = "" }: { title: string; description?: string; children: React.ReactNode; className?: string }) {
   return <section className={`admin-card p-5 sm:p-6 ${className}`}><h2 className="text-base font-extrabold text-[var(--gn-palette-3)]">{title}</h2>{description ? <p className="mt-1 text-xs leading-5 text-[var(--gn-palette-5)]">{description}</p> : null}<div className="mt-5">{children}</div></section>;
 }
@@ -43,6 +40,35 @@ export function SettingsForm({ initial }: { initial: SiteSettingsData }) {
   const [pending, startTransition] = useTransition();
   const [message, setMessage] = useState<{ type: "error" | "success"; text: string } | null>(null);
   function set<K extends keyof FormState>(key: K, value: FormState[K]) { setState((current) => ({ ...current, [key]: value })); }
+
+  const activePalette = findSitePaletteId({
+    1: state.palette1,
+    2: state.palette2,
+    3: state.palette3,
+    5: state.palette5,
+    7: state.palette7,
+    8: state.palette8,
+  });
+
+  function selectPalette(id: SitePaletteId) {
+    const colors = SITE_PALETTES[id].colors;
+    setState((current) => ({
+      ...current,
+      palette1: colors[1],
+      palette2: colors[2],
+      palette3: colors[3],
+      palette5: colors[5],
+      palette7: colors[7],
+      palette8: colors[8],
+    }));
+    setMessage(null);
+    startTransition(async () => {
+      const result = await applyPalettePreset(id);
+      setMessage(result.error
+        ? { type: "error", text: result.error }
+        : { type: "success", text: `Paleta “${SITE_PALETTES[id].name}” aplicada a todo el sitio.` });
+    });
+  }
 
   function save() {
     setMessage(null);
@@ -80,8 +106,35 @@ export function SettingsForm({ initial }: { initial: SiteSettingsData }) {
         </div>
       </Section>
 
-      <Section title="Paleta visual" description="Colores inspirados en montaña, bosque y fuego.">
-        <div className="grid gap-2 sm:grid-cols-2"><ColorField label="Bosque" value={state.palette1} onChange={(v) => set("palette1", v)} /><ColorField label="Noche" value={state.palette2} onChange={(v) => set("palette2", v)} /><ColorField label="Títulos" value={state.palette3} onChange={(v) => set("palette3", v)} /><ColorField label="Texto" value={state.palette5} onChange={(v) => set("palette5", v)} /><ColorField label="Fuego" value={state.palette7} onChange={(v) => set("palette7", v)} /><ColorField label="Fondo" value={state.palette8} onChange={(v) => set("palette8", v)} /></div>
+      <Section title="Paleta visual" description="Selecciona una de las tres combinaciones. El cambio se publica inmediatamente en todo el sitio.">
+        <div className="grid gap-3">
+          {(Object.entries(SITE_PALETTES) as [SitePaletteId, (typeof SITE_PALETTES)[SitePaletteId]][]).map(([id, palette]) => {
+            const selected = activePalette === id;
+            return (
+              <button
+                key={id}
+                type="button"
+                aria-pressed={selected}
+                disabled={pending}
+                onClick={() => selectPalette(id)}
+                className={`rounded-xl border p-3 text-left transition-colors disabled:opacity-60 ${selected ? "border-[var(--gn-palette-1)] bg-[var(--gn-palette-8)] ring-2 ring-[var(--gn-palette-1)]/10" : "border-[#e5e8e5] bg-white hover:border-[#bdc7c0]"}`}
+              >
+                <span className="flex items-start justify-between gap-3">
+                  <span>
+                    <strong className="block text-sm text-[var(--gn-palette-3)]">{palette.name}</strong>
+                    <span className="mt-1 block text-[11px] leading-4 text-[var(--gn-palette-5)]">{palette.description}</span>
+                  </span>
+                  <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${selected ? "bg-[var(--gn-palette-1)] text-white" : "bg-[#f2f4f2] text-[#68716b]"}`}>
+                    {selected ? "Activa" : "Seleccionar"}
+                  </span>
+                </span>
+                <span className="mt-3 flex overflow-hidden rounded-lg border border-black/5" aria-hidden="true">
+                  {Object.values(palette.colors).map((color) => <span key={color} className="h-7 flex-1" style={{ backgroundColor: color }} />)}
+                </span>
+              </button>
+            );
+          })}
+        </div>
       </Section>
 
       <Section title="Pie de página" description="Información institucional y derechos del sitio.">

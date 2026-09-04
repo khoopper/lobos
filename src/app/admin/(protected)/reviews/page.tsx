@@ -3,12 +3,11 @@ import { createClient } from "@/lib/supabase/server";
 import { ReviewsManager } from "./ReviewsManager";
 
 export default async function ReviewsPage() {
-  await requireRole(["admin"]);
-  const supabase = await createClient();
-  const { data } = await supabase
+  const reviewsPromise = createClient().then((supabase) => supabase
     .from("reviews")
     .select("id, author, review_date, rating, body_text, is_published")
-    .order("sort_order");
+    .order("sort_order"));
+  const [, { data }] = await Promise.all([requireRole(["admin"]), reviewsPromise]);
 
   return (
     <div>

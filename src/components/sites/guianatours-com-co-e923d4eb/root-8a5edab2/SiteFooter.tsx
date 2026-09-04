@@ -10,7 +10,7 @@ import {
   YoutubeBrandIcon,
 } from "@/components/sites/guianatours-com-co-e923d4eb/shared/icons";
 import type { NavLink, SocialLink } from "@/types/guianatours-com-co-e923d4eb";
-import { ASSETS, FOOTER } from "./content";
+import { FOOTER } from "./content";
 
 const SOCIAL_GLYPH = {
   facebook: FacebookCircleIcon,
@@ -99,8 +99,8 @@ export function SiteFooter({
         <div className="mx-auto flex max-w-[1140px] flex-col min-[768px]:flex-row">
           <FooterColumn>
             <Image
-              src={logoUrl ?? `${ASSETS}/brand/logo-blanco.png`}
-              alt=""
+              src={logoUrl ?? "/brand/lobos/logo-white-1024.png"}
+              alt="Club de Lobos"
               width={1080}
               height={1080}
               className="mx-auto mb-5 block h-auto w-[244px] max-[767px]:w-[310px]"

@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireRole } from "@/lib/auth/dal";
 import { createClient } from "@/lib/supabase/server";
+import { SITE_PALETTES } from "@/lib/site-palettes";
 import { optionalAssetUrlSchema, optionalHttpUrlSchema } from "@/lib/validation";
 
 const HEX = /^#[0-9a-fA-F]{6}$/;
@@ -37,6 +38,8 @@ const BrandSchema = z.object({
   faviconUrl: optionalAssetUrlSchema.unwrap(),
 });
 
+const PaletteSchema = z.enum(["lobos", "original", "volcan"]);
+
 export interface SettingsState { error?: string; success?: boolean }
 
 function revalidateSettings() {
@@ -54,6 +57,27 @@ export async function applyBrandPackage(raw: z.infer<typeof BrandSchema>): Promi
     logo_footer_url: parsed.data.logoFooterUrl,
     favicon_url: parsed.data.faviconUrl,
   }).eq("id", 1);
+  if (error) return { error: error.message };
+  revalidateSettings();
+  return { success: true };
+}
+
+export async function applyPalettePreset(raw: string): Promise<SettingsState> {
+  await requireRole(["admin"]);
+  const parsed = PaletteSchema.safeParse(raw);
+  if (!parsed.success) return { error: "Paleta no válida." };
+
+  const colors = SITE_PALETTES[parsed.data].colors;
+  const supabase = await createClient();
+  const { error } = await supabase.from("site_settings").update({
+    palette_1: colors[1],
+    palette_2: colors[2],
+    palette_3: colors[3],
+    palette_5: colors[5],
+    palette_7: colors[7],
+    palette_8: colors[8],
+  }).eq("id", 1);
+
   if (error) return { error: error.message };
   revalidateSettings();
   return { success: true };

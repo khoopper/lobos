@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createPublicClient } from "@/lib/supabase/public";
 import type {
   GalleryItem,
   HeroSlide,
@@ -10,7 +10,7 @@ import type {
 
 /**
  * Public-site data layer. Every function here uses the anon-key server
- * client (`createClient()`), so Row Level Security — not application code —
+ * client (`createPublicClient()`), so Row Level Security — not application code —
  * decides what a visitor sees (e.g. `is_published = true` filtering on
  * hero_slides/tours/reviews/gallery_items happens inside Postgres).
  *
@@ -52,7 +52,7 @@ export interface SiteSettingsData {
 }
 
 export async function getSiteSettings(): Promise<SiteSettingsData> {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const { data } = await supabase.from("site_settings").select("*").eq("id", 1).single();
 
   // Falls back to the original static values if the singleton row is ever
@@ -64,8 +64,8 @@ export async function getSiteSettings(): Promise<SiteSettingsData> {
   if (data?.social_youtube_url) socialLinks.push({ label: "YouTube", href: data.social_youtube_url, network: "youtube" });
 
   return {
-    logoHeaderUrl: data?.logo_header_url ?? null,
-    logoFooterUrl: data?.logo_footer_url ?? null,
+    logoHeaderUrl: data?.logo_header_url ?? "/brand/lobos/logo-white-640.png",
+    logoFooterUrl: data?.logo_footer_url ?? "/brand/lobos/logo-white-1024.png",
     faviconUrl: data?.favicon_url ?? null,
     phoneLabel: data?.phone_label ?? "+57 350 225 0680",
     phoneHref: data?.phone_href ?? "tel:350 225 0680",
@@ -91,7 +91,7 @@ export async function getSiteSettings(): Promise<SiteSettingsData> {
 const HOME_HREF = "https://guianatours.com.co/";
 
 export async function getNavLinks(): Promise<NavLink[]> {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const { data } = await supabase
     .from("nav_links")
     .select("id, label, href")
@@ -102,7 +102,7 @@ export async function getNavLinks(): Promise<NavLink[]> {
 }
 
 export async function getHeroSlides(): Promise<HeroSlide[]> {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const { data } = await supabase
     .from("hero_slides")
     .select("id, image_url, heading, description, button_label, href")
@@ -119,7 +119,7 @@ export async function getHeroSlides(): Promise<HeroSlide[]> {
 }
 
 export async function getTours(): Promise<ProductCard[]> {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const { data } = await supabase
     .from("tours")
     .select("id, slug, title, price, currency_symbol, departure_start, departure_end, image_url, hover_image_url, button_label")
@@ -165,7 +165,7 @@ export async function getContentBlocks(): Promise<{
   camping: CampingBlock;
   fotografias: FotografiasBlock;
 }> {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const { data } = await supabase.from("content_blocks").select("key, data");
 
   const byKey = Object.fromEntries((data ?? []).map((b) => [b.key, b.data]));
@@ -184,7 +184,7 @@ export async function getContentBlocks(): Promise<{
 }
 
 export async function getGalleryItems(): Promise<GalleryItem[]> {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const { data } = await supabase
     .from("gallery_items")
     .select("id, image_url, image_w, image_h, title")
@@ -206,7 +206,7 @@ export interface ReviewsData {
 }
 
 export async function getReviews(): Promise<ReviewsData> {
-  const supabase = await createClient();
+  const supabase = createPublicClient();
   const { data } = await supabase
     .from("reviews")
     .select("id, author, review_date, rating, body_text")

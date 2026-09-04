@@ -96,7 +96,8 @@ create table public.site_settings (
   updated_at timestamptz not null default now()
 );
 
-insert into public.site_settings (id) values (1);
+insert into public.site_settings (id, logo_header_url, logo_footer_url)
+values (1, '/brand/lobos/logo-white-640.png', '/brand/lobos/logo-white-1024.png');
 
 alter table public.site_settings enable row level security;
 

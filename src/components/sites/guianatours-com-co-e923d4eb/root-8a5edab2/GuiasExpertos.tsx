@@ -40,7 +40,7 @@ export function GuiasExpertos({ block }: { block: GuiasBlock }) {
           >
             <Image
               src={image.src}
-              alt=""
+              alt={block.heading}
               width={image.width}
               height={image.height}
               className="block h-auto w-full"

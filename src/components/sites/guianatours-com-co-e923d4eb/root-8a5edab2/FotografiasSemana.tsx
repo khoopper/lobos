@@ -35,7 +35,7 @@ export function FotografiasSemana({ block, gallery }: { block: FotografiasBlock;
       </section>
 
       <section className="px-[10px]">
-        <div className="flex flex-wrap gap-[10px] [--gn-row-h:150px] min-[1025px]:[--gn-row-h:300px]">
+        <div className="flex flex-wrap gap-3 [--gn-row-h:150px] min-[1025px]:[--gn-row-h:300px]">
           {gallery.map((item) => {
             const ratio = item.width / item.height;
             return (
@@ -45,7 +45,7 @@ export function FotografiasSemana({ block, gallery }: { block: FotografiasBlock;
                 target="_blank"
                 rel="noopener noreferrer"
                 title={item.title}
-                className="group relative block h-[var(--gn-row-h)] overflow-hidden"
+                className="group relative block h-[var(--gn-row-h)] overflow-hidden rounded-xl transition-transform duration-300 ease-out hover:-translate-y-0.5"
                 style={{
                   flexGrow: ratio * 100,
                   flexBasis: `calc(var(--gn-row-h) * ${ratio})`,
@@ -56,7 +56,7 @@ export function FotografiasSemana({ block, gallery }: { block: FotografiasBlock;
                   alt={item.title}
                   width={item.width}
                   height={item.height}
-                  className="h-full w-full object-cover"
+                  className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
                   sizes="(max-width: 1024px) 50vw, 33vw"
                 />
                 <span

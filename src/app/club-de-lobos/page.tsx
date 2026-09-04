@@ -6,8 +6,9 @@ import { getContentBlocks, getGalleryItems } from "@/lib/queries/site-content";
 export const revalidate = 86400;
 
 export const metadata: Metadata = {
-  title: "Club de Lobos | Aventuras en El Salvador",
-  description: "Conoce la comunidad de Club de Lobos: senderismo, viajes, camping y aventuras para descubrir El Salvador en manada.",
+  title: "Quiénes somos",
+  description: "Conoce a Club de Lobos: guías y amigos que organizan senderismo, viajes, camping y aventuras para descubrir El Salvador en manada.",
+  alternates: { canonical: "/club-de-lobos" },
 };
 
 export default async function ClubDeLobosPage() {

@@ -6,8 +6,9 @@ import { getTours } from "@/lib/queries/site-content";
 export const revalidate = 86400;
 
 export const metadata: Metadata = {
-  title: "Próximas salidas | Club de Lobos",
-  description: "Descubre las próximas caminatas, viajes y aventuras de Club de Lobos en El Salvador.",
+  title: "Próximas salidas",
+  description: "Descubre las próximas caminatas, viajes y aventuras guiadas de Club de Lobos en El Salvador: fechas, precios y rutas de senderismo y camping.",
+  alternates: { canonical: "/proximas-salidas" },
 };
 
 export default async function UpcomingToursPage() {

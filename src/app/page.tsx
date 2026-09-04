@@ -17,6 +17,7 @@ import {
   getSiteSettings,
   getTours,
 } from "@/lib/queries/site-content";
+import { buildOrganizationJsonLd, jsonLdString } from "@/lib/seo/schema";
 
 export const revalidate = 86400;
 
@@ -91,6 +92,7 @@ export default async function Home() {
       />
       <CookieNotice />
       <PageViewBeacon />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdString(buildOrganizationJsonLd(settings)) }} />
     </div>
   );
 }

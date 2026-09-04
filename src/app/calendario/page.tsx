@@ -6,8 +6,9 @@ import { getCalendarTours } from "@/lib/queries/site-content";
 export const revalidate = 86400;
 
 export const metadata: Metadata = {
-  title: "Calendario de salidas | Club de Lobos",
+  title: "Calendario de salidas",
   description: "Consulta las próximas aventuras y salidas programadas por Club de Lobos en El Salvador.",
+  alternates: { canonical: "/calendario" },
 };
 
 export default async function CalendarPage() {

@@ -31,6 +31,8 @@ import {
 } from "@/lib/queries/site-content";
 import { getStoredTourDetailRecord, resolveTourDetailCopy } from "@/lib/queries/tour-details";
 import type { TourIconId } from "@/lib/tour-details";
+import { buildBreadcrumbJsonLd, buildTourEventJsonLd, jsonLdString } from "@/lib/seo/schema";
+import { SITE_URL } from "@/lib/site-config";
 
 export const revalidate = 86400;
 export const dynamicParams = true;
@@ -47,15 +49,16 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: TourPageProps): Promise<Metadata> {
   const { slug } = await params;
   const [tour, storedDetails] = await Promise.all([getTourBySlug(slug), getStoredTourDetailRecord()]);
-  if (!tour) return { title: "Salida no encontrada | Club de Lobos" };
+  if (!tour) return { title: "Salida no encontrada", robots: { index: false, follow: false } };
   const duration = getDuration(tour.departureStart, tour.departureEnd);
   const price = [tour.currencySymbol, tour.price].filter(Boolean).join(" ");
   const detail = resolveTourDetailCopy({ id: tour.id, slug, duration, price }, storedDetails);
   return {
-    title: `${tour.title} | Club de Lobos`,
+    title: tour.title,
     description: detail.lead,
+    alternates: { canonical: `/salidas/${encodeURIComponent(slug)}` },
     openGraph: {
-      title: `${tour.title} | Club de Lobos`,
+      title: tour.title,
       description: detail.lead,
       images: tour.images.slice(0, 1),
     },
@@ -94,14 +97,14 @@ interface GalleryImage { url: string; width: number; height: number }
  * interactivity but also the one thing this must never have: lag on first
  * paint. Five fixed layouts (1-5 photos) cover every case a tour can have.
  */
-function TourGallery({ images }: { images: GalleryImage[] }) {
+function TourGallery({ images, title }: { images: GalleryImage[]; title: string }) {
   const [first, ...rest] = images;
   if (!first) return null;
 
   if (images.length === 1) {
     return (
       <section className="relative h-[190px] overflow-hidden bg-[var(--gn-palette-2)] sm:h-[280px]">
-        <Image src={first.url} alt="" fill priority sizes="100vw" className="object-cover object-center opacity-55" />
+        <Image src={first.url} alt={title} fill priority sizes="100vw" className="object-cover object-center opacity-55" />
         <div className="absolute inset-0 bg-gradient-to-b from-black/45 via-black/20 to-[var(--gn-palette-2)]/70" />
       </section>
     );
@@ -111,11 +114,11 @@ function TourGallery({ images }: { images: GalleryImage[] }) {
     <section className="relative h-[220px] overflow-hidden bg-[var(--gn-palette-2)] sm:h-[320px]">
       <div className={`grid h-full gap-0.5 ${images.length === 2 ? "grid-cols-2" : "grid-cols-2 sm:grid-cols-4"}`}>
         <div className={`relative h-full ${images.length > 2 ? "sm:col-span-2 sm:row-span-2" : ""}`}>
-          <Image src={first.url} alt="" fill priority sizes="(max-width: 640px) 50vw, 50vw" className="object-cover object-center" />
+          <Image src={first.url} alt={title} fill priority sizes="(max-width: 640px) 50vw, 50vw" className="object-cover object-center" />
         </div>
         {rest.slice(0, 4).map((image, index) => (
           <div key={image.url} className={`relative h-full ${index === 0 ? "" : "hidden sm:block"}`}>
-            <Image src={image.url} alt="" fill sizes="25vw" className="object-cover object-center" />
+            <Image src={image.url} alt={title} fill sizes="25vw" className="object-cover object-center" />
           </div>
         ))}
       </div>
@@ -160,6 +163,20 @@ export default async function TourPage({ params }: TourPageProps) {
   const duration = getDuration(tour.departureStart, tour.departureEnd);
   const price = [tour.currencySymbol, tour.price].filter(Boolean).join(" ");
   const detail = resolveTourDetailCopy({ id: tour.id, slug, duration, price }, storedDetails);
+  const eventJsonLd = buildTourEventJsonLd({
+    title: tour.title,
+    slug,
+    departureStart: tour.departureStart,
+    departureEnd: tour.departureEnd,
+    description: detail.lead,
+    imageUrl: tour.images[0]?.url,
+    price: tour.price,
+  });
+  const breadcrumbJsonLd = buildBreadcrumbJsonLd([
+    { name: "Inicio", url: SITE_URL },
+    { name: "Próximas salidas", url: `${SITE_URL}/proximas-salidas` },
+    { name: tour.title, url: `${SITE_URL}/salidas/${encodeURIComponent(slug)}` },
+  ]);
 
   return (
     <div
@@ -181,7 +198,7 @@ export default async function TourPage({ params }: TourPageProps) {
         logoUrl={settings.logoHeaderUrl}
       />
 
-      <TourGallery images={tour.images} />
+      <TourGallery images={tour.images} title={tour.title} />
 
       <main className="px-5 py-10 sm:py-14">
         <div className="mx-auto max-w-[1140px]">
@@ -278,6 +295,8 @@ export default async function TourPage({ params }: TourPageProps) {
       />
       <CookieNotice />
       <PageViewBeacon />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdString(eventJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdString(breadcrumbJsonLd) }} />
     </div>
   );
 }

@@ -184,7 +184,10 @@
   line-height: 15px;
   font-weight: 400;
   text-align: center;
-  transition: 0.3s;
+  /* Scoped to the two properties that actually change on hover — `transition:
+     0.3s` (shorthand for `all`) makes the browser watch every animatable
+     property for changes, which is needless work on every hover/focus. */
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 .gn-button:hover,
 .gn-button:focus-visible {

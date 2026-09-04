@@ -13,7 +13,7 @@ function Stars({ count, className }: { count: number; className?: string }) {
   return (
     <span className={cn("flex items-center gap-px", className)} aria-label={`${count} de 5`}>
       {Array.from({ length: count }, (_, i) => (
-        <StarIcon key={i} className="h-[17px] w-[17px] text-[#fbbc04]" />
+        <StarIcon key={i} className="h-[17px] w-[17px] text-[var(--gn-palette-7)]" />
       ))}
     </span>
   );

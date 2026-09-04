@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { LoginForm } from "./LoginForm";
 
-export const metadata: Metadata = { title: "Ingresar — Club de Lobos" };
+export const metadata: Metadata = { title: "Ingresar", robots: { index: false, follow: false } };
 
 export default async function LoginPage({
   searchParams,

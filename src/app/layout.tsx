@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Montserrat } from "next/font/google";
+import { SITE_NAME, SITE_URL } from "@/lib/site-config";
 import "./globals.css";
 
 const montserrat = Montserrat({
@@ -9,15 +10,16 @@ const montserrat = Montserrat({
   display: "swap",
 });
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://lobos-chi.vercel.app";
 const BRAND = "/brand/lobos";
-const TITLE = "Club de Lobos | Aventuras desde El Salvador";
-const DESCRIPTION = "Senderismo, camping, volcanes y viajes para vivir nuevas aventuras con la manada.";
+const TITLE = "Club de Lobos | Guías y aventuras de senderismo en El Salvador";
+const DESCRIPTION = "Club de Lobos: guías expertos, senderismo, camping, volcanes y viajes en El Salvador. Vive cada aventura guiada, segura y en manada.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: TITLE,
+  title: { default: TITLE, template: `%s | ${SITE_NAME}` },
   description: DESCRIPTION,
+  alternates: { canonical: "/" },
+  robots: { index: true, follow: true },
   icons: {
     icon: [
       { url: `${BRAND}/favicon-32.png`, sizes: "32x32", type: "image/png" },
@@ -31,8 +33,14 @@ export const metadata: Metadata = {
     title: TITLE,
     description: DESCRIPTION,
     url: SITE_URL,
-    siteName: "Club de Lobos",
+    siteName: SITE_NAME,
     images: [{ url: `${BRAND}/og-image.png`, width: 1200, height: 630, type: "image/png" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: TITLE,
+    description: DESCRIPTION,
+    images: [`${BRAND}/og-image.png`],
   },
 };
 

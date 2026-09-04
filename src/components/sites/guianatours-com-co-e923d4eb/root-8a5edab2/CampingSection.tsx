@@ -15,7 +15,7 @@ export function CampingSection({ block }: { block: CampingBlock }) {
             {block.image ? (
               <Image
                 src={block.image.src}
-                alt=""
+                alt={block.heading}
                 width={block.image.width}
                 height={block.image.height}
                 className="block h-auto w-full"

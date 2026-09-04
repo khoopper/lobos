@@ -220,8 +220,8 @@ export default async function TourPage({ params }: TourPageProps) {
                 {detail.facts.map((fact) => {
                   const Icon = FACT_ICONS[fact.icon] ?? Activity;
                   return (
-                    <div key={fact.key} className="flex min-h-36 flex-col items-center justify-center bg-[var(--gn-palette-7)] p-3 text-center">
-                      <Icon strokeWidth={1.55} className="mb-3 h-11 w-11 text-[var(--gn-palette-1)]" />
+                    <div tabIndex={0} key={fact.key} className="gn-fact-card flex min-h-36 flex-col items-center justify-center bg-[var(--gn-palette-7)] p-3 text-center outline-none transition-colors duration-200 hover:bg-[var(--gn-palette-7)]/70">
+                      <Icon strokeWidth={1.55} className="gn-fact-icon mb-3 h-11 w-11 text-[var(--gn-palette-1)]" />
                       <strong className="text-sm text-[var(--gn-palette-3)]">{fact.label}</strong>
                       <span className="mt-1 text-[11px] leading-4 text-[var(--gn-palette-5)]">{fact.value}</span>
                     </div>

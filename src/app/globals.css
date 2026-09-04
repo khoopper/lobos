@@ -317,3 +317,17 @@
   background: color-mix(in srgb, #dc2626 12%, white);
   color: #b91c1c;
 }
+
+/* Tour detail "Datos de la salida" fact cards — the icon hops and settles
+   on hover/focus instead of sitting static. Transform-only, so it stays
+   smooth even with several cards animating on a fast hover sweep. */
+@keyframes gn-fact-icon-pop {
+  0% { transform: translateY(0) scale(1) rotate(0deg); }
+  35% { transform: translateY(-7px) scale(1.12) rotate(-6deg); }
+  60% { transform: translateY(0) scale(1.05) rotate(4deg); }
+  100% { transform: translateY(0) scale(1) rotate(0deg); }
+}
+.gn-fact-card:hover .gn-fact-icon,
+.gn-fact-card:focus-visible .gn-fact-icon {
+  animation: gn-fact-icon-pop 0.55s cubic-bezier(0.34, 1.56, 0.64, 1);
+}

@@ -9,6 +9,8 @@ export interface BookingDialogProps {
   onClose: () => void;
   tourId: string;
   tourTitle: string;
+  initialDate?: string;
+  initialPeople?: number;
 }
 
 /**
@@ -19,7 +21,13 @@ export interface BookingDialogProps {
  * Submits through the createBooking Server Action — see
  * src/app/actions/bookings.ts for the honeypot + throttle + RLS story.
  */
-export function BookingDialog({ onClose, tourId, tourTitle }: BookingDialogProps) {
+export function BookingDialog({
+  onClose,
+  tourId,
+  tourTitle,
+  initialDate = "",
+  initialPeople = 1,
+}: BookingDialogProps) {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
@@ -110,11 +118,11 @@ export function BookingDialog({ onClose, tourId, tourTitle }: BookingDialogProps
             <div className="flex gap-3">
               <label className="flex flex-1 flex-col gap-1 text-sm text-[var(--gn-palette-3)]">
                 Fecha deseada
-                <input name="requestedDate" type="date" required className={inputCls} />
+                <input name="requestedDate" type="date" defaultValue={initialDate} required className={inputCls} />
               </label>
               <label className="flex w-28 flex-col gap-1 text-sm text-[var(--gn-palette-3)]">
                 Personas
-                <input name="numPeople" type="number" min={1} max={50} defaultValue={1} required className={inputCls} />
+                <input name="numPeople" type="number" min={1} max={50} defaultValue={initialPeople} required className={inputCls} />
               </label>
             </div>
             <label className="flex flex-col gap-1 text-sm text-[var(--gn-palette-3)]">

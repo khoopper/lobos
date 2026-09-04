@@ -59,6 +59,7 @@ export async function upsertTour(raw: z.infer<typeof TourSchema>): Promise<Actio
 
   if (error) return { error: error.message };
   revalidatePath("/");
+  revalidatePath("/salidas/[slug]", "page");
   revalidatePath("/admin/tours");
   return { success: true };
 }
@@ -69,6 +70,7 @@ export async function deleteTour(id: string): Promise<ActionState> {
   const { error } = await supabase.from("tours").delete().eq("id", id);
   if (error) return { error: error.message };
   revalidatePath("/");
+  revalidatePath("/salidas/[slug]", "page");
   revalidatePath("/admin/tours");
   return { success: true };
 }

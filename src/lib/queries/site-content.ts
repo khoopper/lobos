@@ -136,12 +136,57 @@ export async function getTours(): Promise<ProductCard[]> {
     currencySymbol: t.currency_symbol,
     nextDeparture: formatDeparture(t.departure_start, t.departure_end),
     image: t.image_url,
-    // Booking is a dialog trigger from Phase 6 on, not a real per-tour page yet —
-    // temporary safe default so nothing links to a 404.
     hoverImage: t.hover_image_url ?? t.image_url,
-    href: SALIDAS_URL,
+    href: `/salidas/${encodeURIComponent(t.slug)}`,
     buttonLabel: t.button_label,
   }));
+}
+
+export interface TourDetailData {
+  id: string;
+  slug: string;
+  title: string;
+  price: string;
+  currencySymbol: string;
+  departureStart: string;
+  departureEnd: string | null;
+  imageUrl: string;
+  imageWidth: number;
+  imageHeight: number;
+}
+
+export async function getTourBySlug(slug: string): Promise<TourDetailData | null> {
+  const supabase = createPublicClient();
+  const { data } = await supabase
+    .from("tours")
+    .select("id, slug, title, price, currency_symbol, departure_start, departure_end, image_url, image_w, image_h")
+    .eq("slug", slug)
+    .eq("is_published", true)
+    .maybeSingle();
+
+  if (!data) return null;
+  return {
+    id: data.id,
+    slug: data.slug,
+    title: data.title,
+    price: data.price,
+    currencySymbol: data.currency_symbol,
+    departureStart: data.departure_start,
+    departureEnd: data.departure_end,
+    imageUrl: data.image_url,
+    imageWidth: data.image_w,
+    imageHeight: data.image_h,
+  };
+}
+
+export async function getPublishedTourSlugs(): Promise<string[]> {
+  const supabase = createPublicClient();
+  const { data } = await supabase
+    .from("tours")
+    .select("slug")
+    .eq("is_published", true)
+    .order("sort_order");
+  return (data ?? []).map((tour) => tour.slug);
 }
 
 export interface GuiasBlock {

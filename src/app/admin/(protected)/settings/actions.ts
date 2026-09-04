@@ -41,6 +41,7 @@ export interface SettingsState { error?: string; success?: boolean }
 
 function revalidateSettings() {
   revalidatePath("/");
+  revalidatePath("/salidas/[slug]", "page");
 }
 
 export async function applyBrandPackage(raw: z.infer<typeof BrandSchema>): Promise<SettingsState> {

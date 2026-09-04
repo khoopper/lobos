@@ -39,6 +39,7 @@ export async function POST(request: Request) {
   }
 
   revalidatePath("/");
+  revalidatePath("/salidas/[slug]", "page");
   const response = NextResponse.json({ success: true });
   response.cookies.set("lobos-site-palette", parsed.data.id, {
     maxAge: 60 * 60 * 24 * 365,

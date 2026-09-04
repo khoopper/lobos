@@ -15,8 +15,8 @@ import { BookingDialog } from "./BookingDialog";
  *   primary image      → scale(1.07); secondary image opacity 0 → 1
  *
  * The "Ver salida" button opens the booking dialog instead of navigating —
- * there's no per-tour detail page yet, so the image/title still link to the
- * shared category URL (product.href) while the button is the real CTA.
+ * The image and title open the local information page for the selected tour;
+ * the action button keeps the quick booking dialog available from the landing.
  */
 export function ProductCard({ product }: { product: ProductCardData }) {
   const [bookingOpen, setBookingOpen] = useState(false);

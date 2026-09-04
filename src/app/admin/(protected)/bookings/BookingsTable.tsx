@@ -1,9 +1,12 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { Calendar, CalendarX2, Check, Trash2, X } from "lucide-react";
+import { useEffect, useRef, useState, useTransition } from "react";
+import { createPortal } from "react-dom";
+import { Calendar, CalendarX2, Check, MoreVertical, Trash2, X } from "lucide-react";
 import { deleteBooking, updateBookingStatus } from "./actions";
 import type { BookingStatus, ProfileRole } from "@/lib/supabase/types";
+
+const MENU_WIDTH = 160;
 
 export interface BookingRow {
   id: string;
@@ -23,11 +26,107 @@ const STATUS_LABEL: Record<BookingStatus, string> = {
   cancelled: "Cancelada",
 };
 
-const STATUS_BADGE: Record<BookingStatus, string> = {
-  pending: "admin-badge admin-badge-pending",
-  confirmed: "admin-badge admin-badge-confirmed",
-  cancelled: "admin-badge admin-badge-cancelled",
-};
+function StatusMenu({ status, pending, onConfirm, onCancel, onDelete }: {
+  status: BookingStatus;
+  pending: boolean;
+  onConfirm: () => void;
+  onCancel: () => void;
+  onDelete: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [coords, setCoords] = useState<{ top: number; left: number } | null>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  function openMenu() {
+    const rect = buttonRef.current?.getBoundingClientRect();
+    if (rect) setCoords({ top: rect.bottom + 4, left: rect.right - MENU_WIDTH });
+    setOpen(true);
+  }
+
+  useEffect(() => {
+    if (!open) return;
+    function onDocPointerDown(event: MouseEvent) {
+      const target = event.target as Node;
+      if (buttonRef.current?.contains(target) || menuRef.current?.contains(target)) return;
+      setOpen(false);
+    }
+    // Position was computed from the trigger's rect at open time — any scroll
+    // or resize invalidates it, so just close rather than track and reposition.
+    function onScrollOrResize() { setOpen(false); }
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") setOpen(false);
+    }
+    document.addEventListener("mousedown", onDocPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    window.addEventListener("scroll", onScrollOrResize, true);
+    window.addEventListener("resize", onScrollOrResize);
+    return () => {
+      document.removeEventListener("mousedown", onDocPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener("scroll", onScrollOrResize, true);
+      window.removeEventListener("resize", onScrollOrResize);
+    };
+  }, [open]);
+
+  return (
+    <div className="inline-flex items-center gap-1.5">
+      <span className="text-sm font-medium text-[var(--gn-palette-3)]">{STATUS_LABEL[status]}</span>
+      <button
+        ref={buttonRef}
+        type="button"
+        onClick={() => (open ? setOpen(false) : openMenu())}
+        disabled={pending}
+        aria-label="Cambiar estado de la reserva"
+        aria-expanded={open}
+        aria-haspopup="menu"
+        className="flex h-7 w-7 items-center justify-center rounded-lg text-[var(--gn-palette-5)] transition-colors hover:bg-[var(--gn-palette-8)] disabled:opacity-50"
+      >
+        <MoreVertical className="h-4 w-4" />
+      </button>
+      {open && coords
+        ? createPortal(
+            <div
+              ref={menuRef}
+              role="menu"
+              style={{ position: "fixed", top: coords.top, left: coords.left, width: MENU_WIDTH }}
+              className="z-[1000] overflow-hidden rounded-xl border border-black/10 bg-white py-1 shadow-xl"
+            >
+              {status !== "confirmed" ? (
+                <button
+                  type="button"
+                  role="menuitem"
+                  onClick={() => { setOpen(false); onConfirm(); }}
+                  className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs font-semibold text-emerald-700 transition-colors hover:bg-emerald-50"
+                >
+                  <Check className="h-3.5 w-3.5" />Confirmar
+                </button>
+              ) : null}
+              {status !== "cancelled" ? (
+                <button
+                  type="button"
+                  role="menuitem"
+                  onClick={() => { setOpen(false); onCancel(); }}
+                  className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs font-semibold text-[var(--gn-palette-5)] transition-colors hover:bg-[var(--gn-palette-8)]"
+                >
+                  <X className="h-3.5 w-3.5" />Cancelar
+                </button>
+              ) : null}
+              <button
+                type="button"
+                role="menuitem"
+                onClick={() => { setOpen(false); onDelete(); }}
+                className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs font-semibold text-red-600 transition-colors hover:bg-red-50"
+              >
+                <Trash2 className="h-3.5 w-3.5" />Eliminar
+              </button>
+            </div>,
+            document.body,
+          )
+        : null}
+    </div>
+  );
+}
 
 function Row({ booking, canEdit, onChanged }: { booking: BookingRow; canEdit: boolean; onChanged: (next: BookingRow | null) => void }) {
   const [pending, startTransition] = useTransition();
@@ -40,6 +139,7 @@ function Row({ booking, canEdit, onChanged }: { booking: BookingRow; canEdit: bo
   }
 
   function remove() {
+    if (!window.confirm(`¿Eliminar la reserva de ${booking.customer_name}?`)) return;
     startTransition(async () => {
       const result = await deleteBooking(booking.id);
       if (!result.error) onChanged(null);
@@ -48,12 +148,9 @@ function Row({ booking, canEdit, onChanged }: { booking: BookingRow; canEdit: bo
 
   return (
     <tr className="border-b border-black/5 transition-colors last:border-0 hover:bg-[var(--gn-palette-8)]">
-      <td className="px-4 py-3 font-semibold text-[var(--gn-palette-3)]">{booking.customer_name}</td>
-      <td className="px-4 py-3 text-[var(--gn-palette-5)]">
-        {booking.email}
-        <br />
-        {booking.phone}
-      </td>
+      <td className="whitespace-nowrap px-4 py-3 font-semibold text-[var(--gn-palette-3)]">{booking.customer_name}</td>
+      <td className="whitespace-nowrap px-4 py-3 text-[var(--gn-palette-5)]">{booking.email}</td>
+      <td className="whitespace-nowrap px-4 py-3 text-[var(--gn-palette-5)]">{booking.phone}</td>
       <td className="px-4 py-3 font-medium text-[var(--gn-palette-3)]">{booking.tourTitle}</td>
       <td className="px-4 py-3 text-[var(--gn-palette-5)]">
         <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
@@ -63,45 +160,18 @@ function Row({ booking, canEdit, onChanged }: { booking: BookingRow; canEdit: bo
       </td>
       <td className="px-4 py-3 text-[var(--gn-palette-5)]">{booking.num_people}</td>
       <td className="px-4 py-3">
-        <span className={STATUS_BADGE[booking.status]}>
-          {STATUS_LABEL[booking.status]}
-        </span>
+        {canEdit ? (
+          <StatusMenu
+            status={booking.status}
+            pending={pending}
+            onConfirm={() => setStatus("confirmed")}
+            onCancel={() => setStatus("cancelled")}
+            onDelete={remove}
+          />
+        ) : (
+          <span className="text-sm font-medium text-[var(--gn-palette-3)]">{STATUS_LABEL[booking.status]}</span>
+        )}
       </td>
-      {canEdit ? (
-        <td className="px-4 py-3">
-          <div className="flex flex-wrap items-center gap-1.5">
-            {booking.status !== "confirmed" ? (
-              <button
-                type="button"
-                disabled={pending}
-                onClick={() => setStatus("confirmed")}
-                className="admin-success-btn px-2.5 py-1.5 text-xs"
-              >
-                <Check className="h-3.5 w-3.5" />Confirmar
-              </button>
-            ) : null}
-            {booking.status !== "cancelled" ? (
-              <button
-                type="button"
-                disabled={pending}
-                onClick={() => setStatus("cancelled")}
-                className="inline-flex items-center gap-1.5 rounded-lg border border-[#d9ded9] px-2.5 py-1.5 text-xs font-semibold text-[var(--gn-palette-5)] transition-colors hover:bg-[var(--gn-palette-8)] disabled:opacity-50"
-              >
-                <X className="h-3.5 w-3.5" />Cancelar
-              </button>
-            ) : null}
-            <button
-              type="button"
-              disabled={pending}
-              onClick={remove}
-              aria-label="Eliminar reserva"
-              className="admin-danger-btn h-8 w-8 shrink-0"
-            >
-              <Trash2 className="h-3.5 w-3.5" />
-            </button>
-          </div>
-        </td>
-      ) : null}
     </tr>
   );
 }
@@ -128,12 +198,12 @@ export function BookingsTable({ bookings: initial, role }: { bookings: BookingRo
         <thead className="border-b border-black/5 text-xs font-bold uppercase tracking-wide text-[var(--gn-palette-5)]">
           <tr>
             <th className="px-4 py-3">Cliente</th>
-            <th className="px-4 py-3">Contacto</th>
+            <th className="px-4 py-3">Correo</th>
+            <th className="px-4 py-3">Teléfono</th>
             <th className="px-4 py-3">Salida</th>
             <th className="px-4 py-3">Fecha</th>
             <th className="px-4 py-3">Personas</th>
             <th className="px-4 py-3">Estado</th>
-            {canEdit ? <th className="px-4 py-3">Acciones</th> : null}
           </tr>
         </thead>
         <tbody>

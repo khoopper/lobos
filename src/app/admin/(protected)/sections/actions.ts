@@ -23,6 +23,8 @@ export async function updateContentBlock(key: z.infer<typeof KeySchema>, data: R
   if (error) return { error: error.message };
 
   revalidatePath("/");
+  revalidatePath("/club-de-lobos");
+  revalidatePath("/salidas/[slug]", "page");
   revalidatePath("/admin/sections");
   return { success: true };
 }

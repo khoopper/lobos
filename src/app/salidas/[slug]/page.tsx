@@ -4,6 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
   Activity,
+  Camera,
   CircleDollarSign,
   Clock3,
   Compass,
@@ -13,7 +14,9 @@ import {
   Thermometer,
   TrendingUp,
   Trees,
+  TentTree,
   UsersRound,
+  Waves,
 } from "lucide-react";
 import { CookieNotice } from "@/components/CookieNotice";
 import { SiteFooter } from "@/components/sites/guianatours-com-co-e923d4eb/root-8a5edab2/SiteFooter";
@@ -25,7 +28,8 @@ import {
   getSiteSettings,
   getTourBySlug,
 } from "@/lib/queries/site-content";
-import { getTourDetailCopy } from "@/lib/tour-details";
+import { getStoredTourDetailRecord, resolveTourDetailCopy } from "@/lib/queries/tour-details";
+import type { TourIconId } from "@/lib/tour-details";
 
 export const revalidate = 86400;
 export const dynamicParams = true;
@@ -41,9 +45,11 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: TourPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const tour = await getTourBySlug(slug);
+  const [tour, storedDetails] = await Promise.all([getTourBySlug(slug), getStoredTourDetailRecord()]);
   if (!tour) return { title: "Salida no encontrada | Club de Lobos" };
-  const detail = getTourDetailCopy(slug);
+  const duration = getDuration(tour.departureStart, tour.departureEnd);
+  const price = [tour.currencySymbol, tour.price].filter(Boolean).join(" ");
+  const detail = resolveTourDetailCopy({ id: tour.id, slug, duration, price }, storedDetails);
   return {
     title: `${tour.title} | Club de Lobos`,
     description: detail.lead,
@@ -63,18 +69,22 @@ function getDuration(start: string, end: string | null) {
   return `${days} días`;
 }
 
-const FACT_ICONS = [
-  Compass,
-  Gauge,
-  Clock3,
-  Mountain,
-  TrendingUp,
-  Thermometer,
-  Trees,
-  Route,
-  UsersRound,
-  CircleDollarSign,
-] as const;
+const FACT_ICONS: Record<TourIconId, typeof Activity> = {
+  compass: Compass,
+  activity: Activity,
+  gauge: Gauge,
+  clock: Clock3,
+  mountain: Mountain,
+  elevation: TrendingUp,
+  temperature: Thermometer,
+  trees: Trees,
+  route: Route,
+  people: UsersRound,
+  price: CircleDollarSign,
+  tent: TentTree,
+  camera: Camera,
+  waves: Waves,
+};
 
 const INFORMATION_SECTIONS = [
   {
@@ -101,28 +111,17 @@ const INFORMATION_SECTIONS = [
 
 export default async function TourPage({ params }: TourPageProps) {
   const { slug } = await params;
-  const [tour, settings, navLinks] = await Promise.all([
+  const [tour, settings, navLinks, storedDetails] = await Promise.all([
     getTourBySlug(slug),
     getSiteSettings(),
-    getNavLinks(),
+    getNavLinks("/proximas-salidas"),
+    getStoredTourDetailRecord(),
   ]);
   if (!tour) notFound();
 
-  const detail = getTourDetailCopy(slug);
   const duration = getDuration(tour.departureStart, tour.departureEnd);
   const price = [tour.currencySymbol, tour.price].filter(Boolean).join(" ");
-  const facts = [
-    ["Actividad", detail.activity],
-    ["Dificultad", detail.difficulty],
-    ["Tiempo", duration],
-    ["Altura", detail.altitude],
-    ["Desnivel", "Por confirmar"],
-    ["Temperatura", detail.temperature],
-    ["Ecosistema", detail.ecosystem],
-    ["Distancia", detail.distance],
-    ["Aventureros", "Cupo limitado"],
-    ["Precio", price],
-  ] as const;
+  const detail = resolveTourDetailCopy({ id: tour.id, slug, duration, price }, storedDetails);
 
   return (
     <div
@@ -159,7 +158,7 @@ export default async function TourPage({ params }: TourPageProps) {
       <main className="px-5 py-10 sm:py-14">
         <div className="mx-auto max-w-[1140px]">
           <Link
-            href="/#proximas-aventuras"
+            href="/proximas-salidas"
             className="mb-6 inline-flex text-sm font-semibold text-[var(--gn-palette-1)] hover:underline"
           >
             ← Volver a próximas aventuras
@@ -183,13 +182,13 @@ export default async function TourPage({ params }: TourPageProps) {
               </div>
 
               <section aria-label="Datos de la salida" className="mt-9 grid grid-cols-2 gap-2 sm:grid-cols-3 xl:grid-cols-5">
-                {facts.map(([label, value], index) => {
-                  const Icon = FACT_ICONS[index] ?? Activity;
+                {detail.facts.map((fact) => {
+                  const Icon = FACT_ICONS[fact.icon] ?? Activity;
                   return (
-                    <div key={label} className="flex min-h-36 flex-col items-center justify-center bg-[var(--gn-palette-7)] p-3 text-center">
+                    <div key={fact.key} className="flex min-h-36 flex-col items-center justify-center bg-[var(--gn-palette-7)] p-3 text-center">
                       <Icon strokeWidth={1.55} className="mb-3 h-11 w-11 text-[var(--gn-palette-1)]" />
-                      <strong className="text-sm text-[var(--gn-palette-3)]">{label}</strong>
-                      <span className="mt-1 text-[11px] leading-4 text-[var(--gn-palette-5)]">{value}</span>
+                      <strong className="text-sm text-[var(--gn-palette-3)]">{fact.label}</strong>
+                      <span className="mt-1 text-[11px] leading-4 text-[var(--gn-palette-5)]">{fact.value}</span>
                     </div>
                   );
                 })}

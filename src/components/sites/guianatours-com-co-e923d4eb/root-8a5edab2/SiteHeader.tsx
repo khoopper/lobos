@@ -14,7 +14,7 @@ import {
 } from "@/components/sites/guianatours-com-co-e923d4eb/shared/icons";
 import type { NavLink, SocialLink } from "@/types/guianatours-com-co-e923d4eb";
 
-const CART_HREF = "/#proximas-aventuras";
+const CART_HREF = "/proximas-salidas";
 const HOME_HREF = "/";
 
 const SOCIAL_GLYPH = {

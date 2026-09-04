@@ -20,7 +20,7 @@ import type {
  * never required touching component JSX.
  */
 
-const SALIDAS_URL = "/#proximas-aventuras";
+const SALIDAS_URL = "/proximas-salidas";
 
 const MONTHS_ES = [
   "Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic",
@@ -94,15 +94,15 @@ export async function getSiteSettings(): Promise<SiteSettingsData> {
 /** The one nav entry that represents this clone's own homepage. */
 const HOME_HREF = "/";
 
-export async function getNavLinks(): Promise<NavLink[]> {
+export async function getNavLinks(currentPath = HOME_HREF): Promise<NavLink[]> {
   const supabase = createPublicClient();
   const { data } = await supabase
     .from("nav_links")
-    .select("id, label, href")
+    .select("id, label, href, sort_order")
     .eq("is_active", true)
     .order("sort_order");
 
-  return (data ?? []).map((l) => ({ id: l.id, label: l.label, href: l.href, active: l.href === HOME_HREF }));
+  return (data ?? []).map((l) => ({ id: l.id, label: l.label, href: l.href, active: l.href === currentPath }));
 }
 
 export async function getHeroSlides(): Promise<HeroSlide[]> {
@@ -139,6 +139,38 @@ export async function getTours(): Promise<ProductCard[]> {
     hoverImage: t.hover_image_url ?? t.image_url,
     href: `/salidas/${encodeURIComponent(t.slug)}`,
     buttonLabel: t.button_label,
+  }));
+}
+
+export interface CalendarTourData {
+  id: string;
+  slug: string;
+  title: string;
+  departureStart: string;
+  departureEnd: string | null;
+  imageUrl: string;
+  price: string;
+  currencySymbol: string;
+}
+
+export async function getCalendarTours(): Promise<CalendarTourData[]> {
+  const supabase = createPublicClient();
+  const { data } = await supabase
+    .from("tours")
+    .select("id, slug, title, departure_start, departure_end, image_url, price, currency_symbol, sort_order")
+    .eq("is_published", true)
+    .order("departure_start")
+    .order("sort_order");
+
+  return (data ?? []).map((tour) => ({
+    id: tour.id,
+    slug: tour.slug,
+    title: tour.title,
+    departureStart: tour.departure_start,
+    departureEnd: tour.departure_end,
+    imageUrl: tour.image_url,
+    price: tour.price,
+    currencySymbol: tour.currency_symbol,
   }));
 }
 

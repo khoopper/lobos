@@ -3,8 +3,22 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireRole } from "@/lib/auth/dal";
-import { createClient } from "@/lib/supabase/server";
+import { createServiceRoleClient } from "@/lib/supabase/server";
+import { TOUR_ICON_IDS } from "@/lib/tour-details";
 import { assetUrlSchema } from "@/lib/validation";
+
+const TourFactSchema = z.object({
+  key: z.string().min(1).max(40),
+  label: z.string().min(1).max(40),
+  value: z.string().min(1).max(100),
+  icon: z.enum(TOUR_ICON_IDS),
+});
+
+const TourDetailSchema = z.object({
+  lead: z.string().min(1).max(600),
+  paragraphs: z.array(z.string().min(1).max(1200)).min(1).max(4),
+  facts: z.array(TourFactSchema).length(10),
+});
 
 const TourSchema = z.object({
   id: z.string().uuid().optional(),
@@ -22,11 +36,42 @@ const TourSchema = z.object({
   hoverImageH: z.number().int().positive().nullable(),
   buttonLabel: z.string().min(1),
   isPublished: z.boolean(),
+  details: TourDetailSchema,
 });
 
 export interface ActionState {
   error?: string;
   success?: boolean;
+}
+
+function revalidateTours() {
+  revalidatePath("/");
+  revalidatePath("/club-de-lobos");
+  revalidatePath("/calendario");
+  revalidatePath("/proximas-salidas");
+  revalidatePath("/salidas/[slug]", "page");
+  revalidatePath("/admin/tours");
+}
+
+async function writeTourDetails(tourId: string, details: z.infer<typeof TourDetailSchema>) {
+  const supabase = createServiceRoleClient();
+  const { data: block, error: readError } = await supabase
+    .from("content_blocks")
+    .select("data")
+    .eq("key", "guias")
+    .single();
+  if (readError) return readError;
+
+  const blockData = block.data && typeof block.data === "object" && !Array.isArray(block.data)
+    ? block.data as Record<string, unknown>
+    : {};
+  const existing = blockData.tourDetails && typeof blockData.tourDetails === "object" && !Array.isArray(blockData.tourDetails)
+    ? blockData.tourDetails as Record<string, unknown>
+    : {};
+  const { error } = await supabase.from("content_blocks").update({
+    data: { ...blockData, tourDetails: { ...existing, [tourId]: details } },
+  }).eq("key", "guias");
+  return error;
 }
 
 export async function upsertTour(raw: z.infer<typeof TourSchema>): Promise<ActionState> {
@@ -35,7 +80,7 @@ export async function upsertTour(raw: z.infer<typeof TourSchema>): Promise<Actio
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Datos inválidos." };
   const d = parsed.data;
 
-  const supabase = await createClient();
+  const supabase = createServiceRoleClient();
   const row = {
     slug: d.slug,
     title: d.title,
@@ -53,37 +98,53 @@ export async function upsertTour(raw: z.infer<typeof TourSchema>): Promise<Actio
     is_published: d.isPublished,
   };
 
-  const { error } = d.id
-    ? await supabase.from("tours").update(row).eq("id", d.id)
-    : await supabase.from("tours").insert({ ...row, sort_order: 9999 });
+  let tourId = d.id;
+  if (tourId) {
+    const { error } = await supabase.from("tours").update(row).eq("id", tourId);
+    if (error) return { error: error.message };
+  } else {
+    const { data, error } = await supabase
+      .from("tours")
+      .insert({ ...row, sort_order: 9999 })
+      .select("id")
+      .single();
+    if (error || !data) return { error: error?.message ?? "No se pudo crear la salida." };
+    tourId = data.id;
+  }
 
-  if (error) return { error: error.message };
-  revalidatePath("/");
-  revalidatePath("/salidas/[slug]", "page");
-  revalidatePath("/admin/tours");
+  const detailsError = await writeTourDetails(tourId, d.details);
+  if (detailsError) return { error: `La salida se guardó, pero no su ficha: ${detailsError.message}` };
+  revalidateTours();
   return { success: true };
 }
 
 export async function deleteTour(id: string): Promise<ActionState> {
   await requireRole(["admin"]);
-  const supabase = await createClient();
+  const supabase = createServiceRoleClient();
   const { error } = await supabase.from("tours").delete().eq("id", id);
   if (error) return { error: error.message };
-  revalidatePath("/");
-  revalidatePath("/salidas/[slug]", "page");
-  revalidatePath("/admin/tours");
+
+  const { data: block } = await supabase.from("content_blocks").select("data").eq("key", "guias").single();
+  if (block?.data && typeof block.data === "object" && !Array.isArray(block.data)) {
+    const blockData = block.data as Record<string, unknown>;
+    const tourDetails = blockData.tourDetails && typeof blockData.tourDetails === "object" && !Array.isArray(blockData.tourDetails)
+      ? { ...blockData.tourDetails as Record<string, unknown> }
+      : {};
+    delete tourDetails[id];
+    await supabase.from("content_blocks").update({ data: { ...blockData, tourDetails } }).eq("key", "guias");
+  }
+  revalidateTours();
   return { success: true };
 }
 
 export async function reorderTours(orderedIds: string[]): Promise<ActionState> {
   await requireRole(["admin"]);
-  const supabase = await createClient();
+  const supabase = createServiceRoleClient();
   const results = await Promise.all(
     orderedIds.map((id, i) => supabase.from("tours").update({ sort_order: i }).eq("id", id)),
   );
   const failed = results.find((r) => r.error);
   if (failed?.error) return { error: failed.error.message };
-  revalidatePath("/");
-  revalidatePath("/admin/tours");
+  revalidateTours();
   return { success: true };
 }

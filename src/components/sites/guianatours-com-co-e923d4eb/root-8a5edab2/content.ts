@@ -13,7 +13,7 @@ import type {
 
 export const ASSETS = "/sites/guianatours-com-co-e923d4eb/root-8a5edab2";
 
-const SALIDAS = "/#proximas-aventuras";
+const SALIDAS = "/proximas-salidas";
 
 export const PHONE_LABEL = "+503 7952-8033 / +503 7554-6785";
 export const PHONE_HREF = "tel:+50379528033";
@@ -21,9 +21,9 @@ export const EMAIL = "";
 
 export const NAV_LINKS: NavLink[] = [
   { id: "nav-inicio", label: "Inicio", href: "/", active: true },
-  { id: "nav-club-lobos", label: "Club de Lobos", href: "/#nosotros" },
+  { id: "nav-club-lobos", label: "Club de Lobos", href: "/club-de-lobos" },
+  { id: "nav-calendario", label: "Calendario", href: "/calendario" },
   { id: "nav-proximas-salidas", label: "Próximas salidas", href: SALIDAS },
-  { id: "nav-instagram", label: "Instagram", href: "https://www.instagram.com/lobos_sv/" },
 ];
 
 export const SOCIAL_LINKS: SocialLink[] = [
@@ -241,8 +241,8 @@ export const FOOTER = {
   subscribeHeading: "Únete a la manada",
   legalLinks: [
     { label: "Aviso de cookies", href: "/#aviso-cookies" },
-    { label: "Próximas salidas", href: "/#proximas-aventuras" },
-    { label: "Conoce la manada", href: "/#nosotros" },
+    { label: "Próximas salidas", href: "/proximas-salidas" },
+    { label: "Conoce la manada", href: "/club-de-lobos" },
     { label: "Instagram", href: "https://www.instagram.com/lobos_sv/" },
   ],
   form: {

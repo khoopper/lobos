@@ -1,9 +1,5 @@
-"use client";
-
-import { useState } from "react";
 import Image from "next/image";
 import type { ProductCard as ProductCardData } from "@/types/guianatours-com-co-e923d4eb";
-import { BookingDialog } from "./BookingDialog";
 
 /**
  * WooCommerce loop card as rendered by Kadence with
@@ -19,8 +15,6 @@ import { BookingDialog } from "./BookingDialog";
  * the action button keeps the quick booking dialog available from the landing.
  */
 export function ProductCard({ product }: { product: ProductCardData }) {
-  const [bookingOpen, setBookingOpen] = useState(false);
-
   return (
     <li className="gn-product-card group relative flex flex-col overflow-hidden rounded-[4px] bg-white">
       {/* .closest-booking-availability */}
@@ -65,19 +59,14 @@ export function ProductCard({ product }: { product: ProductCardData }) {
 
         {/* .product-action-wrap */}
         <div className="absolute inset-x-0 -bottom-8 px-4 opacity-0 transition-opacity duration-300 [transition-timing-function:cubic-bezier(0.17,0.67,0.35,0.95)] group-hover:bottom-[-12.8px] group-hover:opacity-100 group-focus-within:bottom-[-12.8px] group-focus-within:opacity-100">
-          <button
-            type="button"
-            onClick={() => setBookingOpen(true)}
+          <a
+            href={product.href}
             className="block w-full rounded-lg bg-[var(--gn-palette-1)] px-[17px] py-[6.8px] text-center text-[17px] leading-[27.2px] font-normal text-white transition-[color,background,border] duration-200 hover:bg-[var(--gn-palette-2)]"
           >
             {product.buttonLabel}
-          </button>
+          </a>
         </div>
       </div>
-
-      {bookingOpen ? (
-        <BookingDialog onClose={() => setBookingOpen(false)} tourId={product.id} tourTitle={product.title} />
-      ) : null}
     </li>
   );
 }

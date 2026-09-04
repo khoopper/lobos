@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireRole } from "@/lib/auth/dal";
-import { createClient } from "@/lib/supabase/server";
+import { createServiceRoleClient } from "@/lib/supabase/server";
 import { optionalAssetUrlSchema, optionalHttpUrlSchema } from "@/lib/validation";
 
 const HEX = /^#[0-9a-fA-F]{6}$/;
@@ -41,6 +41,9 @@ export interface SettingsState { error?: string; success?: boolean }
 
 function revalidateSettings() {
   revalidatePath("/");
+  revalidatePath("/club-de-lobos");
+  revalidatePath("/calendario");
+  revalidatePath("/proximas-salidas");
   revalidatePath("/salidas/[slug]", "page");
 }
 
@@ -48,7 +51,7 @@ export async function applyBrandPackage(raw: z.infer<typeof BrandSchema>): Promi
   await requireRole(["admin"]);
   const parsed = BrandSchema.safeParse(raw);
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Paquete de marca inválido." };
-  const supabase = await createClient();
+  const supabase = createServiceRoleClient();
   const { error } = await supabase.from("site_settings").update({
     logo_header_url: parsed.data.logoHeaderUrl,
     logo_footer_url: parsed.data.logoFooterUrl,
@@ -64,7 +67,7 @@ export async function updateSiteSettings(raw: z.infer<typeof SettingsSchema>): P
   const parsed = SettingsSchema.safeParse(raw);
   if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Datos inválidos." };
   const d = parsed.data;
-  const supabase = await createClient();
+  const supabase = createServiceRoleClient();
   const { error } = await supabase.from("site_settings").update({
     logo_header_url: d.logoHeaderUrl,
     logo_footer_url: d.logoFooterUrl,

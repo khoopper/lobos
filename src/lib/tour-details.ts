@@ -1,4 +1,46 @@
+export const TOUR_ICON_OPTIONS = [
+  { id: "compass", label: "Brújula" },
+  { id: "activity", label: "Actividad" },
+  { id: "gauge", label: "Dificultad" },
+  { id: "clock", label: "Tiempo" },
+  { id: "mountain", label: "Montaña" },
+  { id: "elevation", label: "Desnivel" },
+  { id: "temperature", label: "Temperatura" },
+  { id: "trees", label: "Bosque" },
+  { id: "route", label: "Ruta" },
+  { id: "people", label: "Personas" },
+  { id: "price", label: "Precio" },
+  { id: "tent", label: "Camping" },
+  { id: "camera", label: "Fotografía" },
+  { id: "waves", label: "Agua" },
+] as const;
+
+export const TOUR_ICON_IDS = TOUR_ICON_OPTIONS.map((option) => option.id) as [
+  (typeof TOUR_ICON_OPTIONS)[number]["id"],
+  ...(typeof TOUR_ICON_OPTIONS)[number]["id"][],
+];
+
+export type TourIconId = (typeof TOUR_ICON_OPTIONS)[number]["id"];
+
+export interface TourFact {
+  key: string;
+  label: string;
+  value: string;
+  icon: TourIconId;
+}
+
 export interface TourDetailCopy {
+  lead: string;
+  paragraphs: string[];
+  facts: TourFact[];
+}
+
+interface DetailVariables {
+  duration?: string;
+  price?: string;
+}
+
+interface DetailPreset {
   lead: string;
   paragraphs: string[];
   activity: string;
@@ -9,7 +51,7 @@ export interface TourDetailCopy {
   temperature: string;
 }
 
-const DETAILS: Record<string, TourDetailCopy> = {
+const DETAILS: Record<string, DetailPreset> = {
   "volcan-santa-ana": {
     lead: "Una ruta para descubrir la fuerza de los paisajes volcánicos de El Salvador.",
     paragraphs: [
@@ -90,7 +132,7 @@ const DETAILS: Record<string, TourDetailCopy> = {
   },
 };
 
-const FALLBACK: TourDetailCopy = {
+const FALLBACK: DetailPreset = {
   lead: "Una nueva experiencia para caminar, viajar y compartir con Club de Lobos.",
   paragraphs: [
     "La información completa de la ruta se confirmará antes de la salida.",
@@ -104,6 +146,53 @@ const FALLBACK: TourDetailCopy = {
   temperature: "Por confirmar",
 };
 
-export function getTourDetailCopy(slug: string): TourDetailCopy {
-  return DETAILS[slug] ?? FALLBACK;
+export function getDefaultTourDetail(slug: string, variables: DetailVariables = {}): TourDetailCopy {
+  const preset = DETAILS[slug] ?? FALLBACK;
+  return {
+    lead: preset.lead,
+    paragraphs: preset.paragraphs,
+    facts: [
+      { key: "activity", label: "Actividad", value: preset.activity, icon: "compass" },
+      { key: "difficulty", label: "Dificultad", value: preset.difficulty, icon: "gauge" },
+      { key: "time", label: "Tiempo", value: variables.duration ?? "Por confirmar", icon: "clock" },
+      { key: "altitude", label: "Altura", value: preset.altitude, icon: "mountain" },
+      { key: "elevation", label: "Desnivel", value: "Por confirmar", icon: "elevation" },
+      { key: "temperature", label: "Temperatura", value: preset.temperature, icon: "temperature" },
+      { key: "ecosystem", label: "Ecosistema", value: preset.ecosystem, icon: "trees" },
+      { key: "distance", label: "Distancia", value: preset.distance, icon: "route" },
+      { key: "people", label: "Aventureros", value: "Cupo limitado", icon: "people" },
+      { key: "price", label: "Precio", value: variables.price ?? "Consultar", icon: "price" },
+    ],
+  };
+}
+
+function isIconId(value: unknown): value is TourIconId {
+  return typeof value === "string" && TOUR_ICON_OPTIONS.some((option) => option.id === value);
+}
+
+/** Sanitizes JSONB content before it reaches a public page or a client component. */
+export function normalizeTourDetail(value: unknown, fallback: TourDetailCopy): TourDetailCopy {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return fallback;
+  const candidate = value as Record<string, unknown>;
+  const facts = Array.isArray(candidate.facts)
+    ? candidate.facts.flatMap((fact, index) => {
+        if (!fact || typeof fact !== "object" || Array.isArray(fact)) return [];
+        const item = fact as Record<string, unknown>;
+        if (typeof item.label !== "string" || typeof item.value !== "string" || !isIconId(item.icon)) return [];
+        return [{
+          key: typeof item.key === "string" && item.key ? item.key : `fact-${index}`,
+          label: item.label,
+          value: item.value,
+          icon: item.icon,
+        }];
+      })
+    : [];
+
+  return {
+    lead: typeof candidate.lead === "string" && candidate.lead ? candidate.lead : fallback.lead,
+    paragraphs: Array.isArray(candidate.paragraphs)
+      ? candidate.paragraphs.filter((paragraph): paragraph is string => typeof paragraph === "string" && Boolean(paragraph))
+      : fallback.paragraphs,
+    facts: facts.length === 10 ? facts : fallback.facts,
+  };
 }

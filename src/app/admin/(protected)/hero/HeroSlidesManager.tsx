@@ -10,7 +10,7 @@ export interface HeroSlideRow {
 }
 
 const inputCls = "admin-input h-10 px-3";
-const EMPTY: Omit<HeroSlideRow, "id"> = { image_url: "", image_w: 0, image_h: 0, heading: "", description: "", button_label: "Ver aventuras", href: "/#proximas-aventuras", is_published: true };
+const EMPTY: Omit<HeroSlideRow, "id"> = { image_url: "", image_w: 0, image_h: 0, heading: "", description: "", button_label: "Ver aventuras", href: "/proximas-salidas", is_published: true };
 
 function Field({ label, children, className = "" }: { label: string; children: React.ReactNode; className?: string }) {
   return <label className={`flex min-w-0 flex-col gap-1.5 ${className}`}><span className="text-xs font-bold text-[var(--gn-palette-3)]">{label}</span>{children}</label>;

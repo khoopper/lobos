@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { TrackedLink } from "@/components/analytics/TrackedLink";
 import type { ProductCard as ProductCardData } from "@/types/guianatours-com-co-e923d4eb";
 
 /**
@@ -59,12 +60,14 @@ export function ProductCard({ product }: { product: ProductCardData }) {
 
         {/* .product-action-wrap */}
         <div className="absolute inset-x-0 -bottom-8 px-4 opacity-0 transition-opacity duration-300 [transition-timing-function:cubic-bezier(0.17,0.67,0.35,0.95)] group-hover:bottom-[-12.8px] group-hover:opacity-100 group-focus-within:bottom-[-12.8px] group-focus-within:opacity-100">
-          <a
+          <TrackedLink
+            eventType="tour_click"
+            eventLabel={product.title}
             href={product.href}
             className="block w-full rounded-lg bg-[var(--gn-palette-1)] px-[17px] py-[6.8px] text-center text-[17px] leading-[27.2px] font-normal text-white transition-[color,background,border] duration-200 hover:bg-[var(--gn-palette-2)]"
           >
             {product.buttonLabel}
-          </a>
+          </TrackedLink>
         </div>
       </div>
     </li>

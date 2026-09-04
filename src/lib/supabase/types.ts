@@ -14,6 +14,8 @@
 export type BookingStatus = "pending" | "confirmed" | "cancelled";
 export type ProfileRole = "admin" | "worker";
 export type ContentBlockKey = "guias" | "camping" | "fotografias";
+export type AnalyticsEventType = "page_view" | "tour_click" | "cta_click" | "social_click";
+export interface TourImage { url: string; width: number; height: number }
 
 export interface Database {
   public: {
@@ -86,12 +88,7 @@ export interface Database {
           currency_symbol: string;
           departure_start: string;
           departure_end: string | null;
-          image_url: string;
-          image_w: number;
-          image_h: number;
-          hover_image_url: string | null;
-          hover_image_w: number | null;
-          hover_image_h: number | null;
+          images: TourImage[];
           button_label: string;
           sort_order: number;
           is_published: boolean;
@@ -164,6 +161,23 @@ export interface Database {
             referencedColumns: ["id"];
           },
         ];
+      };
+      analytics_events: {
+        Row: {
+          id: string;
+          event_type: AnalyticsEventType;
+          path: string;
+          label: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          event_type: AnalyticsEventType;
+          path: string;
+          label?: string | null;
+        };
+        Update: never;
+        Relationships: [];
       };
     };
     Views: Record<string, never>;

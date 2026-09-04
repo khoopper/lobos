@@ -1,14 +1,14 @@
 export const SITE_PALETTES = {
   lobos: {
     name: "Identidad Lobos",
-    description: "Obsidiana, piedra y oro; inspirada en el logo del club.",
+    description: "Piedra, medianoche y oro viejo — la manada que viaja al amparo de la noche.",
     colors: {
-      1: "#222522",
-      2: "#090b0a",
-      3: "#1b1d1b",
-      5: "#626761",
-      7: "#d2a74f",
-      8: "#f6f2e9",
+      1: "#2b2f3a",
+      2: "#14161d",
+      3: "#20222b",
+      5: "#666a75",
+      7: "#c9a15a",
+      8: "#f3f1ea",
     },
   },
   original: {
@@ -24,15 +24,15 @@ export const SITE_PALETTES = {
     },
   },
   volcan: {
-    name: "Ruta Terracota",
-    description: "Cobre, caoba y arena; cálida, exclusiva y aventurera.",
+    name: "Ruta Volcánica",
+    description: "Basalto, ceniza y brasa — inspirada en los volcanes de El Salvador.",
     colors: {
-      1: "#7a3f2b",
-      2: "#2f1e18",
-      3: "#392820",
-      5: "#71635c",
-      7: "#e7c79f",
-      8: "#faf5ee",
+      1: "#3a2620",
+      2: "#1c1210",
+      3: "#2a1c17",
+      5: "#79695f",
+      7: "#e8722c",
+      8: "#f7f0e6",
     },
   },
 } as const;

@@ -15,7 +15,7 @@ export default async function ToursPage() {
   const toursPromise = createClient().then((supabase) => supabase
     .from("tours")
     .select(
-      "id, slug, title, price, currency_symbol, departure_start, departure_end, image_url, image_w, image_h, hover_image_url, hover_image_w, hover_image_h, button_label, is_published",
+      "id, slug, title, price, currency_symbol, departure_start, departure_end, images, button_label, is_published",
     )
     .order("sort_order"));
   const [, { data }, storedDetails] = await Promise.all([
@@ -32,14 +32,6 @@ export default async function ToursPage() {
   })), storedDetails);
 
   return (
-    <div>
-      <h1 className="text-3xl font-extrabold tracking-tight text-[var(--gn-palette-3)]">Aventuras y salidas</h1>
-      <p className="mt-1 text-sm text-[var(--gn-palette-5)]">
-        Tarjetas visibles en la portada. Desmarca &quot;Publicado&quot; para ocultar una salida sin eliminarla.
-      </p>
-      <div className="mt-6">
-        <ToursManager tours={tours.map((tour) => ({ ...tour, details: details[tour.id] }))} />
-      </div>
-    </div>
+    <ToursManager tours={tours.map((tour) => ({ ...tour, details: details[tour.id] }))} />
   );
 }

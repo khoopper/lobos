@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { CookieNotice } from "@/components/CookieNotice";
+import { PageViewBeacon } from "@/components/analytics/PageViewBeacon";
 import { getNavLinks, getSiteSettings } from "@/lib/queries/site-content";
 import { SiteFooter } from "./SiteFooter";
 import { SiteHeader } from "./SiteHeader";
@@ -70,6 +71,7 @@ export async function PublicPageShell({
         creditHref={settings.footerCreditHref}
       />
       <CookieNotice />
+      <PageViewBeacon />
     </div>
   );
 }

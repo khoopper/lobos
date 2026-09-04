@@ -20,6 +20,12 @@ const TourDetailSchema = z.object({
   facts: z.array(TourFactSchema).length(10),
 });
 
+const TourImageSchema = z.object({
+  url: assetUrlSchema,
+  width: z.number().int().positive(),
+  height: z.number().int().positive(),
+});
+
 const TourSchema = z.object({
   id: z.string().uuid().optional(),
   slug: z.string().min(1).regex(/^[a-z0-9-]+$/, "Solo minúsculas, números y guiones."),
@@ -28,12 +34,7 @@ const TourSchema = z.object({
   currencySymbol: z.string().max(4),
   departureStart: z.string().min(1),
   departureEnd: z.string().nullable(),
-  imageUrl: assetUrlSchema,
-  imageW: z.number().int().positive(),
-  imageH: z.number().int().positive(),
-  hoverImageUrl: assetUrlSchema.nullable(),
-  hoverImageW: z.number().int().positive().nullable(),
-  hoverImageH: z.number().int().positive().nullable(),
+  images: z.array(TourImageSchema).min(1, "Agrega al menos una imagen.").max(5, "Máximo 5 imágenes por salida."),
   buttonLabel: z.string().min(1),
   isPublished: z.boolean(),
   details: TourDetailSchema,
@@ -88,12 +89,7 @@ export async function upsertTour(raw: z.infer<typeof TourSchema>): Promise<Actio
     currency_symbol: d.currencySymbol,
     departure_start: d.departureStart,
     departure_end: d.departureEnd,
-    image_url: d.imageUrl,
-    image_w: d.imageW,
-    image_h: d.imageH,
-    hover_image_url: d.hoverImageUrl,
-    hover_image_w: d.hoverImageW,
-    hover_image_h: d.hoverImageH,
+    images: d.images,
     button_label: d.buttonLabel,
     is_published: d.isPublished,
   };

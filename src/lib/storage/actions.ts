@@ -5,7 +5,11 @@ import { createServiceRoleClient } from "@/lib/supabase/server";
 
 export type StorageBucket = "site-assets" | "media";
 
-export const BRAND_PACKAGE_FILES = [
+// Not exported: a "use server" file may only export async functions (and
+// types, which are erased) — exporting this const array too crashes every
+// action in this module with "A 'use server' file can only export async
+// functions, found object."
+const BRAND_PACKAGE_FILES = [
   "logo-white-640.png",
   "logo-white-1024.png",
   "logo-black-640.png",

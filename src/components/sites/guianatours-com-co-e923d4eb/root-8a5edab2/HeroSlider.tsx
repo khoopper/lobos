@@ -1,10 +1,12 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
 } from "@/components/sites/guianatours-com-co-e923d4eb/shared/icons";
+import { track } from "@/lib/analytics/track";
 import type { HeroSlide } from "@/types/guianatours-com-co-e923d4eb";
 
 /** Elementor Slides widget settings, verbatim from data-settings. */
@@ -69,17 +71,26 @@ export function HeroSlider({ slides }: { slides: HeroSlide[] }) {
             aria-label={`${i + 1} de ${count}`}
             aria-hidden={i !== safeIndex}
           >
-            {/* .swiper-slide-bg — cover, centred, no overlay tint */}
-            <div
-              className="absolute inset-0 bg-[var(--gn-palette-2)] bg-cover bg-center bg-no-repeat"
-              style={{ backgroundImage: `url("${slide.image}")` }}
-              role="img"
-              aria-label={slide.heading}
-            />
+            {/* .swiper-slide-bg — cover, centred, no overlay tint. A real
+                next/image (not a CSS background-image) so it's served
+                resized/compressed instead of the raw upload — this is what
+                keeps clicking through slides feeling instant. */}
+            <div className="absolute inset-0 bg-[var(--gn-palette-2)]" role="img" aria-label={slide.heading}>
+              <Image
+                src={slide.image}
+                alt=""
+                fill
+                priority={i === 0}
+                loading={i === 0 ? undefined : "lazy"}
+                sizes="100vw"
+                className="object-cover object-center"
+              />
+            </div>
             {/* .swiper-slide-inner — the whole slide is one link */}
             <a
               href={slide.href}
               tabIndex={i === safeIndex ? undefined : -1}
+              onClick={() => track("cta_click", slide.heading)}
               className="absolute inset-0 mx-auto flex max-w-[1280px] items-end justify-start p-[50px] text-left text-white transition-all duration-100 ease-linear max-[767px]:p-[30px]"
             >
               <div className="w-[600px] max-w-full">

@@ -1,10 +1,11 @@
 "use client";
 
 import { useEffect, useState, useTransition } from "react";
+import Image from "next/image";
 import {
   Activity, AlertTriangle, Camera, ChevronDown, ChevronUp, CircleDollarSign, Clock3, Compass,
-  Gauge, Mountain, Route, TentTree, Thermometer, Trash2, TrendingUp, Trees,
-  UsersRound, Waves,
+  Gauge, Mountain, Plus, Route, TentTree, Thermometer, Trash2, TrendingUp, Trees,
+  UsersRound, Waves, X,
 } from "lucide-react";
 import { ImageUploader } from "@/components/admin/ImageUploader";
 import {
@@ -15,6 +16,8 @@ import {
 } from "@/lib/tour-details";
 import { reorderTours, upsertTour } from "./actions";
 
+export interface TourImage { url: string; width: number; height: number }
+
 export interface TourRow {
   id: string;
   slug: string;
@@ -23,22 +26,17 @@ export interface TourRow {
   currency_symbol: string;
   departure_start: string;
   departure_end: string | null;
-  image_url: string;
-  image_w: number;
-  image_h: number;
-  hover_image_url: string | null;
-  hover_image_w: number | null;
-  hover_image_h: number | null;
+  images: TourImage[];
   button_label: string;
   is_published: boolean;
   details: TourDetailCopy;
 }
 
+const MAX_IMAGES = 5;
 const inputCls = "admin-input h-10 px-3";
 const EMPTY: Omit<TourRow, "id"> = {
   slug: "", title: "", price: "Consultar", currency_symbol: "$", departure_start: "", departure_end: null,
-  image_url: "", image_w: 0, image_h: 0, hover_image_url: null, hover_image_w: null, hover_image_h: null,
-  button_label: "Ver salida", is_published: true, details: getDefaultTourDetail(""),
+  images: [{ url: "", width: 0, height: 0 }], button_label: "Ver salida", is_published: true, details: getDefaultTourDetail(""),
 };
 
 const ICONS: Record<TourIconId, typeof Activity> = {
@@ -100,7 +98,7 @@ function DeleteTourDialog({
   );
 }
 
-function TourEditor({ tour, onDeleted }: { tour: TourRow | null; onDeleted?: () => void }) {
+function TourEditor({ tour, onDeleted, onSaved }: { tour: TourRow | null; onDeleted?: () => void; onSaved?: (row: TourRow) => void }) {
   const [form, setForm] = useState(tour ?? EMPTY);
   const [pending, startTransition] = useTransition();
   const [message, setMessage] = useState<string | null>(null);
@@ -109,6 +107,8 @@ function TourEditor({ tour, onDeleted }: { tour: TourRow | null; onDeleted?: () 
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
   function save() {
+    const images = form.images.filter((image) => image.url);
+    if (images.length === 0) { setMessage("Agrega al menos una imagen."); return; }
     setMessage(null);
     startTransition(async () => {
       const result = await upsertTour({
@@ -119,20 +119,35 @@ function TourEditor({ tour, onDeleted }: { tour: TourRow | null; onDeleted?: () 
         currencySymbol: form.currency_symbol,
         departureStart: form.departure_start,
         departureEnd: form.departure_end || null,
-        imageUrl: form.image_url,
-        imageW: form.image_w,
-        imageH: form.image_h,
-        hoverImageUrl: form.hover_image_url,
-        hoverImageW: form.hover_image_w,
-        hoverImageH: form.hover_image_h,
+        images,
         buttonLabel: form.button_label,
         isPublished: form.is_published,
         details: form.details,
       });
       if (result.error) setMessage(result.error);
       else if (!tour) window.location.reload();
-      else setMessage("Cambios publicados.");
+      else {
+        setMessage("Cambios publicados.");
+        setForm((current) => ({ ...current, images }));
+        onSaved?.({ ...form, images, id: tour.id });
+      }
     });
+  }
+
+  function setImage(index: number, image: TourImage) {
+    setForm((current) => {
+      const images = [...current.images];
+      images[index] = image;
+      return { ...current, images };
+    });
+  }
+
+  function addImageSlot() {
+    setForm((current) => (current.images.length >= MAX_IMAGES ? current : { ...current, images: [...current.images, { url: "", width: 0, height: 0 }] }));
+  }
+
+  function removeImage(index: number) {
+    setForm((current) => ({ ...current, images: current.images.filter((_, i) => i !== index) }));
   }
 
   async function remove() {
@@ -168,10 +183,34 @@ function TourEditor({ tour, onDeleted }: { tour: TourRow | null; onDeleted?: () 
   }
 
   return (
-    <article className="admin-card grid gap-5 p-5 lg:grid-cols-[250px_minmax(0,1fr)]">
+    <div className="grid gap-5 p-5 lg:grid-cols-[250px_minmax(0,1fr)]">
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-1">
-        <ImageUploader bucket="media" label="Imagen principal" value={form.image_w ? { url: form.image_url, width: form.image_w, height: form.image_h } : null} onChange={(image) => setForm((current) => ({ ...current, image_url: image.url, image_w: image.width, image_h: image.height }))} previewClassName="aspect-[4/5] w-full rounded-xl object-cover" />
-        <ImageUploader bucket="media" label="Imagen secundaria (opcional)" value={form.hover_image_w && form.hover_image_url ? { url: form.hover_image_url, width: form.hover_image_w, height: form.hover_image_h! } : null} onChange={(image) => setForm((current) => ({ ...current, hover_image_url: image.url, hover_image_w: image.width, hover_image_h: image.height }))} previewClassName="aspect-[4/3] w-full rounded-xl object-cover lg:aspect-[16/7]" />
+        {form.images.map((image, index) => (
+          <div key={index} className="relative">
+            <ImageUploader
+              bucket="media"
+              label={index === 0 ? "Imagen principal" : `Imagen ${index + 1}`}
+              value={image.url ? image : null}
+              onChange={(next) => setImage(index, next)}
+              previewClassName="aspect-[4/5] w-full rounded-xl object-cover"
+            />
+            {form.images.length > 1 ? (
+              <button type="button" onClick={() => removeImage(index)} aria-label="Quitar imagen" className="absolute right-1.5 top-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-black/60 text-white hover:bg-black/80">
+                <X className="h-3.5 w-3.5" />
+              </button>
+            ) : null}
+          </div>
+        ))}
+        {form.images.length < MAX_IMAGES ? (
+          <button
+            type="button"
+            onClick={addImageSlot}
+            className="flex aspect-[4/5] w-full flex-col items-center justify-center gap-1 rounded-xl border border-dashed border-[#cfd6d0] bg-[#f8f9f7] text-xs font-semibold text-[var(--gn-palette-5)] hover:border-[var(--gn-palette-1)] hover:text-[var(--gn-palette-1)]"
+          >
+            <Plus className="h-5 w-5" />
+            Agregar imagen
+          </button>
+        ) : null}
       </div>
 
       <div className="grid min-w-0 content-start gap-4 sm:grid-cols-2">
@@ -237,12 +276,49 @@ function TourEditor({ tour, onDeleted }: { tour: TourRow | null; onDeleted?: () 
           onConfirm={remove}
         />
       ) : null}
-    </article>
+    </div>
+  );
+}
+
+function TourCard({ tour, index, total, expanded, onToggle, onMove, onDeleted, onSaved }: {
+  tour: TourRow; index: number; total: number; expanded: boolean; onToggle: () => void;
+  onMove: (delta: number) => void; onDeleted: () => void; onSaved: (row: TourRow) => void;
+}) {
+  return (
+    <div className={`admin-card overflow-hidden ${expanded ? "sm:col-span-2 xl:col-span-3" : ""}`}>
+      {expanded ? (
+        <TourEditor tour={tour} onDeleted={onDeleted} onSaved={onSaved} />
+      ) : (
+        <button type="button" onClick={onToggle} className="flex w-full flex-col text-left">
+          <span className="relative aspect-[4/3] w-full overflow-hidden bg-[var(--gn-palette-8)]">
+            {tour.images[0] ? <Image src={tour.images[0].url} alt="" width={tour.images[0].width} height={tour.images[0].height} className="h-full w-full object-cover" /> : null}
+            {tour.images.length > 1 ? <span className="absolute bottom-2 right-2 rounded-full bg-black/60 px-1.5 py-0.5 text-[10px] font-bold text-white">+{tour.images.length - 1}</span> : null}
+            {!tour.is_published ? <span className="absolute left-2 top-2 rounded-full bg-black/70 px-2 py-0.5 text-[10px] font-bold text-white">Oculta</span> : null}
+          </span>
+          <span className="flex flex-col gap-1 p-3">
+            <strong className="truncate text-sm text-[var(--gn-palette-3)]">{tour.title || "Sin título"}</strong>
+            <span className="flex items-center justify-between gap-2 text-xs text-[var(--gn-palette-5)]">
+              <span className="truncate">{tour.departure_start ? new Date(`${tour.departure_start}T00:00:00Z`).toLocaleDateString("es-SV", { day: "numeric", month: "short", timeZone: "UTC" }) : "Sin fecha"}</span>
+              <span className="shrink-0 font-bold text-[var(--gn-palette-1)]">{tour.currency_symbol} {tour.price}</span>
+            </span>
+          </span>
+        </button>
+      )}
+      <div className="flex items-center justify-between border-t border-black/5 px-3 py-2">
+        <div className="flex gap-1">
+          <button type="button" onClick={() => onMove(-1)} disabled={index === 0} aria-label="Subir" className="flex h-7 w-7 items-center justify-center rounded-lg text-[var(--gn-palette-5)] hover:bg-[var(--gn-palette-8)] disabled:opacity-30"><ChevronUp className="h-4 w-4" /></button>
+          <button type="button" onClick={() => onMove(1)} disabled={index === total - 1} aria-label="Bajar" className="flex h-7 w-7 items-center justify-center rounded-lg text-[var(--gn-palette-5)] hover:bg-[var(--gn-palette-8)] disabled:opacity-30"><ChevronDown className="h-4 w-4" /></button>
+        </div>
+        <button type="button" onClick={onToggle} className="text-xs font-bold text-[var(--gn-palette-1)]">{expanded ? "Cerrar" : "Editar"}</button>
+      </div>
+    </div>
   );
 }
 
 export function ToursManager({ tours: initial }: { tours: TourRow[] }) {
   const [tours, setTours] = useState(initial);
+  const [creating, setCreating] = useState(false);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
   const [, startTransition] = useTransition();
 
   function move(index: number, delta: number) {
@@ -256,18 +332,46 @@ export function ToursManager({ tours: initial }: { tours: TourRow[] }) {
 
   return (
     <div className="flex flex-col gap-5">
-      {tours.map((tour, index) => (
-        <div key={tour.id} className="relative">
-          <div className="absolute right-3 top-3 z-10 flex gap-1">
-            <button type="button" onClick={() => move(index, -1)} disabled={index === 0} aria-label="Subir" className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/95 shadow disabled:opacity-30"><ChevronUp className="h-4 w-4" /></button>
-            <button type="button" onClick={() => move(index, 1)} disabled={index === tours.length - 1} aria-label="Bajar" className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/95 shadow disabled:opacity-30"><ChevronDown className="h-4 w-4" /></button>
-          </div>
-          <TourEditor tour={tour} onDeleted={() => setTours((current) => current.filter((item) => item.id !== tour.id))} />
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0">
+          <h1 className="text-3xl font-extrabold tracking-tight text-[var(--gn-palette-3)]">Aventuras y salidas</h1>
+          <p className="mt-1 max-w-3xl text-sm leading-6 text-[var(--gn-palette-5)]">
+            Tarjetas visibles en la portada. Desmarca &quot;Publicado&quot; para ocultar una salida sin eliminarla.
+          </p>
         </div>
-      ))}
-      <div className="mt-3">
-        <h2 className="mb-3 text-base font-extrabold text-[var(--gn-palette-3)]">Nueva salida</h2>
-        <TourEditor tour={null} />
+        <button
+          type="button"
+          onClick={() => setCreating((current) => !current)}
+          aria-expanded={creating}
+          aria-controls="new-tour-form"
+          className="gn-button inline-flex shrink-0 items-center justify-center gap-2 font-bold"
+        >
+          <Plus className={`h-4 w-4 transition-transform ${creating ? "rotate-45" : ""}`} />
+          {creating ? "Cerrar formulario" : "Nueva salida"}
+        </button>
+      </div>
+
+      {creating ? (
+        <section id="new-tour-form" className="admin-card">
+          <h2 className="border-b border-black/5 px-5 pt-4 text-base font-extrabold text-[var(--gn-palette-3)]">Crear una nueva salida</h2>
+          <TourEditor tour={null} />
+        </section>
+      ) : null}
+
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        {tours.map((tour, index) => (
+          <TourCard
+            key={tour.id}
+            tour={tour}
+            index={index}
+            total={tours.length}
+            expanded={expandedId === tour.id}
+            onToggle={() => setExpandedId((current) => (current === tour.id ? null : tour.id))}
+            onMove={(delta) => move(index, delta)}
+            onDeleted={() => { setTours((current) => current.filter((item) => item.id !== tour.id)); setExpandedId(null); }}
+            onSaved={(row) => setTours((current) => current.map((item) => (item.id === row.id ? row : item)))}
+          />
+        ))}
       </div>
     </div>
   );

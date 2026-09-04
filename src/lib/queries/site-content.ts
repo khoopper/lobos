@@ -126,7 +126,7 @@ export async function getTours(): Promise<ProductCard[]> {
   const supabase = createPublicClient();
   const { data } = await supabase
     .from("tours")
-    .select("id, slug, title, price, currency_symbol, departure_start, departure_end, image_url, hover_image_url, button_label")
+    .select("id, slug, title, price, currency_symbol, departure_start, departure_end, images, button_label")
     .order("sort_order");
 
   return (data ?? []).map((t) => ({
@@ -135,8 +135,8 @@ export async function getTours(): Promise<ProductCard[]> {
     price: t.price,
     currencySymbol: t.currency_symbol,
     nextDeparture: formatDeparture(t.departure_start, t.departure_end),
-    image: t.image_url,
-    hoverImage: t.hover_image_url ?? t.image_url,
+    image: t.images[0]?.url ?? "",
+    hoverImage: t.images[1]?.url ?? t.images[0]?.url ?? "",
     href: `/salidas/${encodeURIComponent(t.slug)}`,
     buttonLabel: t.button_label,
   }));
@@ -157,7 +157,7 @@ export async function getCalendarTours(): Promise<CalendarTourData[]> {
   const supabase = createPublicClient();
   const { data } = await supabase
     .from("tours")
-    .select("id, slug, title, departure_start, departure_end, image_url, price, currency_symbol, sort_order")
+    .select("id, slug, title, departure_start, departure_end, images, price, currency_symbol, sort_order")
     .eq("is_published", true)
     .order("departure_start")
     .order("sort_order");
@@ -168,7 +168,7 @@ export async function getCalendarTours(): Promise<CalendarTourData[]> {
     title: tour.title,
     departureStart: tour.departure_start,
     departureEnd: tour.departure_end,
-    imageUrl: tour.image_url,
+    imageUrl: tour.images[0]?.url ?? "",
     price: tour.price,
     currencySymbol: tour.currency_symbol,
   }));
@@ -182,16 +182,14 @@ export interface TourDetailData {
   currencySymbol: string;
   departureStart: string;
   departureEnd: string | null;
-  imageUrl: string;
-  imageWidth: number;
-  imageHeight: number;
+  images: { url: string; width: number; height: number }[];
 }
 
 export async function getTourBySlug(slug: string): Promise<TourDetailData | null> {
   const supabase = createPublicClient();
   const { data } = await supabase
     .from("tours")
-    .select("id, slug, title, price, currency_symbol, departure_start, departure_end, image_url, image_w, image_h")
+    .select("id, slug, title, price, currency_symbol, departure_start, departure_end, images")
     .eq("slug", slug)
     .eq("is_published", true)
     .maybeSingle();
@@ -205,9 +203,7 @@ export async function getTourBySlug(slug: string): Promise<TourDetailData | null
     currencySymbol: data.currency_symbol,
     departureStart: data.departure_start,
     departureEnd: data.departure_end,
-    imageUrl: data.image_url,
-    imageWidth: data.image_w,
-    imageHeight: data.image_h,
+    images: data.images,
   };
 }
 

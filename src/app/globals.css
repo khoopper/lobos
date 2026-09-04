@@ -143,8 +143,6 @@
   --gn-palette-8: #fbfaec; /* cream — page background */
   --gn-palette-9: #ffffff;
 
-  --gn-btn-bg: var(--gn-palette-1);
-  --gn-btn-bg-hover: var(--gn-palette-2);
   --gn-btn-fg: #ffffff;
 
   --gn-container: 1140px; /* Elementor boxed container */
@@ -175,7 +173,12 @@
   display: inline-block;
   padding: 12px 24px;
   border-radius: 8px;
-  background-color: var(--gn-btn-bg);
+  /* Reference the palette variables directly (not via an indirect
+     --gn-btn-bg alias resolved once at :root) so a palette override lower
+     in the tree — e.g. the inline style on the homepage wrapper — actually
+     takes effect. An alias resolved at its declaring scope does not
+     re-resolve when only the variable it points to changes downstream. */
+  background-color: var(--gn-palette-1);
   color: var(--gn-btn-fg);
   font-size: 15px;
   line-height: 15px;
@@ -185,7 +188,7 @@
 }
 .gn-button:hover,
 .gn-button:focus-visible {
-  background-color: var(--gn-btn-bg-hover);
+  background-color: var(--gn-palette-2);
   color: var(--gn-btn-fg);
 }
 

@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { ChevronDown, ChevronUp, Trash2 } from "lucide-react";
+import Image from "next/image";
+import { ChevronDown, ChevronUp, Plus, Trash2 } from "lucide-react";
 import { ImageUploader } from "@/components/admin/ImageUploader";
 import { deleteHeroSlide, reorderHeroSlides, upsertHeroSlide } from "./actions";
 
@@ -16,7 +17,7 @@ function Field({ label, children, className = "" }: { label: string; children: R
   return <label className={`flex min-w-0 flex-col gap-1.5 ${className}`}><span className="text-xs font-bold text-[var(--gn-palette-3)]">{label}</span>{children}</label>;
 }
 
-function SlideEditor({ slide, onDeleted }: { slide: HeroSlideRow | null; onDeleted?: () => void }) {
+function SlideEditor({ slide, onDeleted, onSaved }: { slide: HeroSlideRow | null; onDeleted?: () => void; onSaved?: (row: HeroSlideRow) => void }) {
   const [form, setForm] = useState(slide ?? EMPTY);
   const [pending, startTransition] = useTransition();
   const [message, setMessage] = useState<string | null>(null);
@@ -27,7 +28,7 @@ function SlideEditor({ slide, onDeleted }: { slide: HeroSlideRow | null; onDelet
       const result = await upsertHeroSlide({ id: slide?.id, imageUrl: form.image_url, imageW: form.image_w, imageH: form.image_h, heading: form.heading, description: form.description, buttonLabel: form.button_label, href: form.href, isPublished: form.is_published });
       if (result.error) setMessage(result.error);
       else if (!slide) window.location.reload();
-      else setMessage("Cambios publicados.");
+      else { setMessage("Cambios publicados."); onSaved?.({ ...form, id: slide.id }); }
     });
   }
 
@@ -37,7 +38,7 @@ function SlideEditor({ slide, onDeleted }: { slide: HeroSlideRow | null; onDelet
   }
 
   return (
-    <article className="admin-card grid gap-5 p-5 md:grid-cols-[220px_minmax(0,1fr)]">
+    <div className="grid gap-5 p-5 md:grid-cols-[220px_minmax(0,1fr)]">
       <ImageUploader bucket="media" label="Imagen" value={form.image_w ? { url: form.image_url, width: form.image_w, height: form.image_h } : null} onChange={(image) => setForm((current) => ({ ...current, image_url: image.url, image_w: image.width, image_h: image.height }))} previewClassName="aspect-[4/5] w-full rounded-xl object-cover" />
       <div className="grid min-w-0 gap-4 sm:grid-cols-2">
         <Field label="Título" className="sm:col-span-2"><input className={inputCls} value={form.heading} onChange={(e) => setForm((current) => ({ ...current, heading: e.target.value }))} /></Field>
@@ -50,17 +51,96 @@ function SlideEditor({ slide, onDeleted }: { slide: HeroSlideRow | null; onDelet
         </div>
         {message ? <p className={`text-xs font-semibold sm:col-span-2 ${message.includes("publicados") ? "text-emerald-700" : "text-red-600"}`}>{message}</p> : null}
       </div>
-    </article>
+    </div>
+  );
+}
+
+function SlideCard({ slide, index, total, expanded, onToggle, onMove, onDeleted, onSaved }: {
+  slide: HeroSlideRow; index: number; total: number; expanded: boolean; onToggle: () => void;
+  onMove: (delta: number) => void; onDeleted: () => void; onSaved: (row: HeroSlideRow) => void;
+}) {
+  return (
+    <div className={`admin-card overflow-hidden ${expanded ? "sm:col-span-2 xl:col-span-3" : ""}`}>
+      {expanded ? (
+        <SlideEditor slide={slide} onDeleted={onDeleted} onSaved={onSaved} />
+      ) : (
+        <button type="button" onClick={onToggle} className="flex w-full flex-col text-left">
+          <span className="relative aspect-[16/10] w-full overflow-hidden bg-[var(--gn-palette-8)]">
+            <Image src={slide.image_url} alt="" width={slide.image_w} height={slide.image_h} className="h-full w-full object-cover" />
+            {!slide.is_published ? <span className="absolute left-2 top-2 rounded-full bg-black/70 px-2 py-0.5 text-[10px] font-bold text-white">Oculta</span> : null}
+          </span>
+          <span className="flex flex-col gap-1 p-3">
+            <strong className="truncate text-sm text-[var(--gn-palette-3)]">{slide.heading || "Sin título"}</strong>
+            <span className="truncate text-xs text-[var(--gn-palette-5)]">{slide.description || "Sin descripción"}</span>
+          </span>
+        </button>
+      )}
+      <div className="flex items-center justify-between border-t border-black/5 px-3 py-2">
+        <div className="flex gap-1">
+          <button type="button" onClick={() => onMove(-1)} disabled={index === 0} aria-label="Subir" className="flex h-7 w-7 items-center justify-center rounded-lg text-[var(--gn-palette-5)] hover:bg-[var(--gn-palette-8)] disabled:opacity-30"><ChevronUp className="h-4 w-4" /></button>
+          <button type="button" onClick={() => onMove(1)} disabled={index === total - 1} aria-label="Bajar" className="flex h-7 w-7 items-center justify-center rounded-lg text-[var(--gn-palette-5)] hover:bg-[var(--gn-palette-8)] disabled:opacity-30"><ChevronDown className="h-4 w-4" /></button>
+        </div>
+        <button type="button" onClick={onToggle} className="text-xs font-bold text-[var(--gn-palette-1)]">{expanded ? "Cerrar" : "Editar"}</button>
+      </div>
+    </div>
   );
 }
 
 export function HeroSlidesManager({ slides: initial }: { slides: HeroSlideRow[] }) {
   const [slides, setSlides] = useState(initial);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [creating, setCreating] = useState(false);
   const [, startTransition] = useTransition();
+
   function move(index: number, delta: number) {
     const next = [...slides]; const target = index + delta; if (target < 0 || target >= next.length) return;
     [next[index], next[target]] = [next[target], next[index]]; setSlides(next);
     startTransition(() => { void reorderHeroSlides(next.map((slide) => slide.id)); });
   }
-  return <div className="flex flex-col gap-5">{slides.map((slide, index) => <div key={slide.id} className="relative"><div className="absolute right-3 top-3 z-10 flex gap-1"><button type="button" onClick={() => move(index, -1)} disabled={index === 0} aria-label="Subir" className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/95 shadow disabled:opacity-30"><ChevronUp className="h-4 w-4" /></button><button type="button" onClick={() => move(index, 1)} disabled={index === slides.length - 1} aria-label="Bajar" className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/95 shadow disabled:opacity-30"><ChevronDown className="h-4 w-4" /></button></div><SlideEditor slide={slide} onDeleted={() => setSlides((current) => current.filter((item) => item.id !== slide.id))} /></div>)}<div className="mt-3"><h2 className="mb-3 text-base font-extrabold text-[var(--gn-palette-3)]">Nueva diapositiva</h2><SlideEditor slide={null} /></div></div>;
+
+  return (
+    <div className="flex flex-col gap-5">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0">
+          <h1 className="text-3xl font-extrabold tracking-tight text-[var(--gn-palette-3)]">Portada</h1>
+          <p className="mt-1 max-w-3xl text-sm leading-6 text-[var(--gn-palette-5)]">
+            Diapositivas del inicio. Toca una tarjeta para editarla; usa las flechas para cambiar su orden.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => setCreating((current) => !current)}
+          aria-expanded={creating}
+          aria-controls="new-slide-form"
+          className="gn-button inline-flex shrink-0 items-center justify-center gap-2 font-bold"
+        >
+          <Plus className={`h-4 w-4 transition-transform ${creating ? "rotate-45" : ""}`} />
+          {creating ? "Cerrar formulario" : "Nueva diapositiva"}
+        </button>
+      </div>
+
+      {creating ? (
+        <section id="new-slide-form" className="admin-card">
+          <h2 className="border-b border-black/5 px-5 pt-4 text-base font-extrabold text-[var(--gn-palette-3)]">Nueva diapositiva</h2>
+          <SlideEditor slide={null} />
+        </section>
+      ) : null}
+
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        {slides.map((slide, index) => (
+          <SlideCard
+            key={slide.id}
+            slide={slide}
+            index={index}
+            total={slides.length}
+            expanded={expandedId === slide.id}
+            onToggle={() => setExpandedId((current) => (current === slide.id ? null : slide.id))}
+            onMove={(delta) => move(index, delta)}
+            onDeleted={() => { setSlides((current) => current.filter((item) => item.id !== slide.id)); setExpandedId(null); }}
+            onSaved={(row) => setSlides((current) => current.map((item) => (item.id === row.id ? row : item)))}
+          />
+        ))}
+      </div>
+    </div>
+  );
 }

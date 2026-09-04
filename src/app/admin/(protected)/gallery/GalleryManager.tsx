@@ -99,6 +99,19 @@ export function GalleryManager({ items: initial }: { items: GalleryItemRow[] }) 
 
   return (
     <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0">
+          <h1 className="text-3xl font-extrabold tracking-tight text-[var(--gn-palette-3)]">Galería</h1>
+          <p className="mt-1 max-w-3xl text-sm leading-6 text-[var(--gn-palette-5)]">Fotografías de rutas y experiencias visibles en la portada.</p>
+        </div>
+        <div className="admin-card w-full shrink-0 p-4 sm:w-72">
+          <h2 className="mb-2 text-xs font-bold uppercase tracking-wide text-[var(--gn-palette-3)]">Agregar foto</h2>
+          <ImageUploader bucket="media" onChange={addNew} />
+          {pending ? <p className="mt-2 text-xs text-[var(--gn-palette-5)]">Agregando…</p> : null}
+          {error ? <p className="mt-2 text-xs text-red-600">{error}</p> : null}
+        </div>
+      </div>
+
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-4">
         {items.map((item) => (
           <ItemCard
@@ -107,13 +120,6 @@ export function GalleryManager({ items: initial }: { items: GalleryItemRow[] }) 
             onChanged={(next) => setItems((prev) => (next ? prev.map((i) => (i.id === item.id ? next : i)) : prev.filter((i) => i.id !== item.id)))}
           />
         ))}
-      </div>
-
-      <div className="admin-card max-w-sm p-5">
-        <h2 className="mb-3 text-lg font-bold text-[var(--gn-palette-3)]">Agregar foto</h2>
-        <ImageUploader bucket="media" onChange={addNew} />
-        {pending ? <p className="mt-2 text-sm text-[var(--gn-palette-5)]">Agregando…</p> : null}
-        {error ? <p className="mt-2 text-sm text-red-600">{error}</p> : null}
       </div>
     </div>
   );

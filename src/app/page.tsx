@@ -7,6 +7,7 @@ import { ReviewsSection } from "@/components/sites/guianatours-com-co-e923d4eb/r
 import { FotografiasSemana } from "@/components/sites/guianatours-com-co-e923d4eb/root-8a5edab2/FotografiasSemana";
 import { SiteFooter } from "@/components/sites/guianatours-com-co-e923d4eb/root-8a5edab2/SiteFooter";
 import { CookieNotice } from "@/components/CookieNotice";
+import { PageViewBeacon } from "@/components/analytics/PageViewBeacon";
 import {
   getContentBlocks,
   getGalleryItems,
@@ -89,6 +90,7 @@ export default async function Home() {
         creditHref={settings.footerCreditHref}
       />
       <CookieNotice />
+      <PageViewBeacon />
     </div>
   );
 }

@@ -129,12 +129,10 @@ async function main() {
         currency_symbol: p.currencySymbol,
         departure_start: dep.start,
         departure_end: dep.end,
-        image_url: p.image,
-        image_w: TOUR_IMAGE_SIZE.w,
-        image_h: TOUR_IMAGE_SIZE.h,
-        hover_image_url: p.hoverImage,
-        hover_image_w: TOUR_IMAGE_SIZE.w,
-        hover_image_h: TOUR_IMAGE_SIZE.h,
+        images: [
+          { url: p.image, width: TOUR_IMAGE_SIZE.w, height: TOUR_IMAGE_SIZE.h },
+          { url: p.hoverImage, width: TOUR_IMAGE_SIZE.w, height: TOUR_IMAGE_SIZE.h },
+        ],
         button_label: p.buttonLabel,
         sort_order: i,
       };

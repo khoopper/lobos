@@ -19,6 +19,7 @@ import {
   Waves,
 } from "lucide-react";
 import { CookieNotice } from "@/components/CookieNotice";
+import { PageViewBeacon } from "@/components/analytics/PageViewBeacon";
 import { SiteFooter } from "@/components/sites/guianatours-com-co-e923d4eb/root-8a5edab2/SiteFooter";
 import { SiteHeader } from "@/components/sites/guianatours-com-co-e923d4eb/root-8a5edab2/SiteHeader";
 import { TourBookingPanel } from "@/components/sites/guianatours-com-co-e923d4eb/root-8a5edab2/TourBookingPanel";
@@ -56,7 +57,7 @@ export async function generateMetadata({ params }: TourPageProps): Promise<Metad
     openGraph: {
       title: `${tour.title} | Club de Lobos`,
       description: detail.lead,
-      images: [{ url: tour.imageUrl, width: tour.imageWidth, height: tour.imageHeight }],
+      images: tour.images.slice(0, 1),
     },
   };
 }
@@ -85,6 +86,43 @@ const FACT_ICONS: Record<TourIconId, typeof Activity> = {
   camera: Camera,
   waves: Waves,
 };
+
+interface GalleryImage { url: string; width: number; height: number }
+
+/**
+ * Pure server markup, no client JS — a lightbox or carousel would add
+ * interactivity but also the one thing this must never have: lag on first
+ * paint. Five fixed layouts (1-5 photos) cover every case a tour can have.
+ */
+function TourGallery({ images }: { images: GalleryImage[] }) {
+  const [first, ...rest] = images;
+  if (!first) return null;
+
+  if (images.length === 1) {
+    return (
+      <section className="relative h-[190px] overflow-hidden bg-[var(--gn-palette-2)] sm:h-[280px]">
+        <Image src={first.url} alt="" fill priority sizes="100vw" className="object-cover object-center opacity-55" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/45 via-black/20 to-[var(--gn-palette-2)]/70" />
+      </section>
+    );
+  }
+
+  return (
+    <section className="relative h-[220px] overflow-hidden bg-[var(--gn-palette-2)] sm:h-[320px]">
+      <div className={`grid h-full gap-0.5 ${images.length === 2 ? "grid-cols-2" : "grid-cols-2 sm:grid-cols-4"}`}>
+        <div className={`relative h-full ${images.length > 2 ? "sm:col-span-2 sm:row-span-2" : ""}`}>
+          <Image src={first.url} alt="" fill priority sizes="(max-width: 640px) 50vw, 50vw" className="object-cover object-center" />
+        </div>
+        {rest.slice(0, 4).map((image, index) => (
+          <div key={image.url} className={`relative h-full ${index === 0 ? "" : "hidden sm:block"}`}>
+            <Image src={image.url} alt="" fill sizes="25vw" className="object-cover object-center" />
+          </div>
+        ))}
+      </div>
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/25 via-transparent to-[var(--gn-palette-2)]/60" />
+    </section>
+  );
+}
 
 const INFORMATION_SECTIONS = [
   {
@@ -143,17 +181,7 @@ export default async function TourPage({ params }: TourPageProps) {
         logoUrl={settings.logoHeaderUrl}
       />
 
-      <section className="relative h-[190px] overflow-hidden bg-[var(--gn-palette-2)] sm:h-[230px]">
-        <Image
-          src={tour.imageUrl}
-          alt=""
-          fill
-          priority
-          sizes="100vw"
-          className="object-cover object-center opacity-55"
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-black/45 via-black/20 to-[var(--gn-palette-2)]/70" />
-      </section>
+      <TourGallery images={tour.images} />
 
       <main className="px-5 py-10 sm:py-14">
         <div className="mx-auto max-w-[1140px]">
@@ -249,6 +277,7 @@ export default async function TourPage({ params }: TourPageProps) {
         creditHref={settings.footerCreditHref}
       />
       <CookieNotice />
+      <PageViewBeacon />
     </div>
   );
 }

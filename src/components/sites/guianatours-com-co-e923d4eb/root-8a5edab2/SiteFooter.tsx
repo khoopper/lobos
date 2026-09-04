@@ -9,6 +9,7 @@ import {
   PhoneSolidIcon,
   YoutubeBrandIcon,
 } from "@/components/sites/guianatours-com-co-e923d4eb/shared/icons";
+import { track } from "@/lib/analytics/track";
 import type { NavLink, SocialLink } from "@/types/guianatours-com-co-e923d4eb";
 import { FOOTER } from "./content";
 
@@ -203,7 +204,7 @@ export function SiteFooter({
           <div className="flex items-center p-[10px] min-[768px]:w-1/2">
             <ul className="-mx-2 flex flex-wrap max-[767px]:w-full max-[767px]:justify-center">
               <li className="mx-2 flex items-center">
-                <a href={phoneHref} className="flex items-center text-white">
+                <a href={phoneHref} onClick={() => track("cta_click", "phone")} className="flex items-center text-white">
                   <PhoneSolidIcon className="h-[14px] w-[14px] shrink-0" />
                   <span className="pl-[5px] text-[14px] leading-[22.4px] font-normal text-white">{phoneLabel}</span>
                 </a>
@@ -228,6 +229,7 @@ export function SiteFooter({
                     href={social.href}
                     target="_blank"
                     rel="noopener noreferrer"
+                    onClick={() => track("social_click", social.network)}
                     className="flex h-7 w-7 items-center justify-center rounded-full bg-white text-[var(--gn-palette-1)]"
                   >
                     <span className="sr-only">{social.label}</span>

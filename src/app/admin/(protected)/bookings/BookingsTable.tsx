@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { CalendarX2 } from "lucide-react";
+import { Calendar, CalendarX2, Check, Trash2, X } from "lucide-react";
 import { deleteBooking, updateBookingStatus } from "./actions";
 import type { BookingStatus, ProfileRole } from "@/lib/supabase/types";
 
@@ -23,10 +23,10 @@ const STATUS_LABEL: Record<BookingStatus, string> = {
   cancelled: "Cancelada",
 };
 
-const STATUS_COLOR: Record<BookingStatus, string> = {
-  pending: "bg-yellow-100 text-yellow-800",
-  confirmed: "bg-green-100 text-green-800",
-  cancelled: "bg-red-100 text-red-800",
+const STATUS_BADGE: Record<BookingStatus, string> = {
+  pending: "admin-badge admin-badge-pending",
+  confirmed: "admin-badge admin-badge-confirmed",
+  cancelled: "admin-badge admin-badge-cancelled",
 };
 
 function Row({ booking, canEdit, onChanged }: { booking: BookingRow; canEdit: boolean; onChanged: (next: BookingRow | null) => void }) {
@@ -54,25 +54,30 @@ function Row({ booking, canEdit, onChanged }: { booking: BookingRow; canEdit: bo
         <br />
         {booking.phone}
       </td>
-      <td className="px-4 py-3 text-[var(--gn-palette-5)]">{booking.tourTitle}</td>
-      <td className="px-4 py-3 text-[var(--gn-palette-5)]">{booking.requested_date}</td>
+      <td className="px-4 py-3 font-medium text-[var(--gn-palette-3)]">{booking.tourTitle}</td>
+      <td className="px-4 py-3 text-[var(--gn-palette-5)]">
+        <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
+          <Calendar className="h-3.5 w-3.5 shrink-0 text-[var(--gn-palette-1)]" />
+          {new Date(`${booking.requested_date}T00:00:00Z`).toLocaleDateString("es-SV", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" })}
+        </span>
+      </td>
       <td className="px-4 py-3 text-[var(--gn-palette-5)]">{booking.num_people}</td>
       <td className="px-4 py-3">
-        <span className={`rounded-full px-2.5 py-1 text-xs font-bold ${STATUS_COLOR[booking.status]}`}>
+        <span className={STATUS_BADGE[booking.status]}>
           {STATUS_LABEL[booking.status]}
         </span>
       </td>
       {canEdit ? (
         <td className="px-4 py-3">
-          <div className="flex flex-wrap gap-1.5">
+          <div className="flex flex-wrap items-center gap-1.5">
             {booking.status !== "confirmed" ? (
               <button
                 type="button"
                 disabled={pending}
                 onClick={() => setStatus("confirmed")}
-                className="rounded-lg border border-emerald-200 px-2 py-1 text-xs font-semibold text-emerald-700 transition-colors hover:bg-emerald-50 disabled:opacity-50"
+                className="admin-success-btn px-2.5 py-1.5 text-xs"
               >
-                Confirmar
+                <Check className="h-3.5 w-3.5" />Confirmar
               </button>
             ) : null}
             {booking.status !== "cancelled" ? (
@@ -80,18 +85,19 @@ function Row({ booking, canEdit, onChanged }: { booking: BookingRow; canEdit: bo
                 type="button"
                 disabled={pending}
                 onClick={() => setStatus("cancelled")}
-                className="rounded-lg border border-red-200 px-2 py-1 text-xs font-semibold text-red-600 transition-colors hover:bg-red-50 disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-[#d9ded9] px-2.5 py-1.5 text-xs font-semibold text-[var(--gn-palette-5)] transition-colors hover:bg-[var(--gn-palette-8)] disabled:opacity-50"
               >
-                Cancelar
+                <X className="h-3.5 w-3.5" />Cancelar
               </button>
             ) : null}
             <button
               type="button"
               disabled={pending}
               onClick={remove}
-              className="rounded-lg border border-[#d9ded9] px-2 py-1 text-xs font-semibold text-[var(--gn-palette-5)] transition-colors hover:bg-[var(--gn-palette-8)] disabled:opacity-50"
+              aria-label="Eliminar reserva"
+              className="admin-danger-btn h-8 w-8 shrink-0"
             >
-              Eliminar
+              <Trash2 className="h-3.5 w-3.5" />
             </button>
           </div>
         </td>

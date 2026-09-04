@@ -53,7 +53,11 @@ export interface SiteSettingsData {
 
 export async function getSiteSettings(): Promise<SiteSettingsData> {
   const supabase = createPublicClient();
-  const { data } = await supabase.from("site_settings").select("*").eq("id", 1).single();
+  const { data } = await supabase
+    .from("site_settings")
+    .select("logo_header_url, logo_footer_url, favicon_url, phone_label, phone_href, email, address, social_facebook_url, social_instagram_url, social_youtube_url, palette_1, palette_2, palette_3, palette_5, palette_7, palette_8, footer_registro, footer_copyright, footer_credit_label, footer_credit_href")
+    .eq("id", 1)
+    .single();
 
   // Falls back to the original static values if the singleton row is ever
   // missing (should not happen — the migration inserts it), so the public

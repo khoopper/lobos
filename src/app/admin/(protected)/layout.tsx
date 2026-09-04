@@ -26,7 +26,7 @@ export default async function ProtectedAdminLayout({ children }: { children: Rea
   const requestedPalette = cookieStore.get("lobos-site-palette")?.value;
   const paletteId: SitePaletteId = requestedPalette && requestedPalette in SITE_PALETTES
     ? requestedPalette as SitePaletteId
-    : "lobos";
+    : "original";
   const palette = SITE_PALETTES[paletteId].colors;
 
   return (

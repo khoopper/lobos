@@ -63,8 +63,8 @@ function ItemCard({ item, onChanged }: { item: GalleryItemRow; onChanged: (next:
             <button type="button" onClick={save} disabled={pending || !dirty} aria-label="Guardar" className="flex h-7 w-7 items-center justify-center rounded-lg text-[var(--gn-palette-1)] transition-colors hover:bg-[var(--gn-palette-8)] disabled:opacity-30">
               <Check className="h-4 w-4" />
             </button>
-            <button type="button" onClick={remove} disabled={pending} aria-label="Eliminar" className="flex h-7 w-7 items-center justify-center rounded-lg text-red-600 transition-colors hover:bg-red-50 disabled:opacity-50">
-              <Trash2 className="h-4 w-4" />
+            <button type="button" onClick={remove} disabled={pending} aria-label="Eliminar" className="admin-danger-btn h-7 w-7">
+              <Trash2 className="h-3.5 w-3.5" />
             </button>
           </div>
         </div>

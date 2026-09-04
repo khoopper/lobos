@@ -267,7 +267,7 @@ function TourEditor({ tour, onDeleted, onSaved }: { tour: TourRow | null; onDele
 
       {message ? <p className={`text-xs font-semibold ${message.includes("publicados") ? "text-emerald-700" : "text-red-600"}`}>{message}</p> : null}
       <div className="flex items-center justify-between gap-2 border-t border-black/5 pt-4">
-        {tour ? <button type="button" onClick={() => { setDeleteError(null); setDeleteOpen(true); }} disabled={pending || deletePending} className="inline-flex items-center gap-2 rounded-lg border border-red-200 px-3 py-2 text-xs font-bold text-red-600 disabled:opacity-50"><Trash2 className="h-4 w-4" />Eliminar</button> : <span />}
+        {tour ? <button type="button" onClick={() => { setDeleteError(null); setDeleteOpen(true); }} disabled={pending || deletePending} className="admin-danger-btn px-3 py-2 text-xs"><Trash2 className="h-4 w-4" />Eliminar</button> : <span />}
         <button type="button" onClick={save} disabled={pending} className="gn-button disabled:opacity-50"><span className="inline-flex items-center">{pending ? "Guardando…" : tour ? "Guardar" : "Agregar salida"}</span></button>
       </div>
       {tour && deleteOpen ? (

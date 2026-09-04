@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import {
-  Activity, Camera, ChevronDown, ChevronUp, CircleDollarSign, Clock3, Compass,
+  Activity, AlertTriangle, Camera, ChevronDown, ChevronUp, CircleDollarSign, Clock3, Compass,
   Gauge, Mountain, Route, TentTree, Thermometer, Trash2, TrendingUp, Trees,
   UsersRound, Waves,
 } from "lucide-react";
@@ -13,7 +13,7 @@ import {
   type TourDetailCopy,
   type TourIconId,
 } from "@/lib/tour-details";
-import { deleteTour, reorderTours, upsertTour } from "./actions";
+import { reorderTours, upsertTour } from "./actions";
 
 export interface TourRow {
   id: string;
@@ -56,10 +56,57 @@ function Field({ label, children, className = "" }: { label: string; children: R
   return <label className={`flex min-w-0 flex-col gap-1.5 ${className}`}><span className="text-xs font-bold text-[var(--gn-palette-3)]">{label}</span>{children}</label>;
 }
 
+function DeleteTourDialog({
+  title,
+  pending,
+  error,
+  onCancel,
+  onConfirm,
+}: {
+  title: string;
+  pending: boolean;
+  error: string | null;
+  onCancel: () => void;
+  onConfirm: () => void;
+}) {
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && !pending) onCancel();
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [onCancel, pending]);
+
+  return (
+    <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="delete-tour-title">
+      <button type="button" aria-label="Cerrar confirmación" disabled={pending} onClick={onCancel} className="absolute inset-0 h-full w-full cursor-default bg-black/55 backdrop-blur-[2px]" />
+      <div className="relative w-full max-w-md rounded-2xl border border-black/10 bg-white p-6 shadow-2xl">
+        <div className="flex items-start gap-4">
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-red-50 text-red-600"><AlertTriangle className="h-5 w-5" /></span>
+          <div className="min-w-0">
+            <h2 id="delete-tour-title" className="text-lg font-extrabold text-[var(--gn-palette-3)]">Eliminar salida</h2>
+            <p className="mt-2 text-sm leading-6 text-[var(--gn-palette-5)]">
+              ¿Quieres eliminar <strong className="text-[var(--gn-palette-3)]">{title}</strong>? Esta acción no se puede deshacer.
+            </p>
+          </div>
+        </div>
+        {error ? <p role="alert" className="mt-4 rounded-xl border border-red-200 bg-red-50 p-3 text-xs font-semibold leading-5 text-red-700">{error}</p> : null}
+        <div className="mt-6 flex justify-end gap-2">
+          <button type="button" onClick={onCancel} disabled={pending} className="h-10 rounded-lg border border-[#d9ded9] px-4 text-sm font-bold text-[var(--gn-palette-3)] transition-colors hover:bg-[var(--gn-palette-8)] disabled:opacity-50">Cancelar</button>
+          <button type="button" onClick={onConfirm} disabled={pending} className="h-10 rounded-lg bg-red-600 px-4 text-sm font-bold text-white transition-colors hover:bg-red-700 disabled:opacity-50">{pending ? "Eliminando…" : "Sí, eliminar"}</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function TourEditor({ tour, onDeleted }: { tour: TourRow | null; onDeleted?: () => void }) {
   const [form, setForm] = useState(tour ?? EMPTY);
   const [pending, startTransition] = useTransition();
   const [message, setMessage] = useState<string | null>(null);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deletePending, setDeletePending] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   function save() {
     setMessage(null);
@@ -88,13 +135,26 @@ function TourEditor({ tour, onDeleted }: { tour: TourRow | null; onDeleted?: () 
     });
   }
 
-  function remove() {
-    if (!tour || !window.confirm("¿Eliminar esta salida?")) return;
-    startTransition(async () => {
-      const result = await deleteTour(tour.id);
-      if (result.error) setMessage(result.error);
-      else onDeleted?.();
-    });
+  async function remove() {
+    if (!tour || deletePending) return;
+    setDeleteError(null);
+    setDeletePending(true);
+    try {
+      const response = await fetch(`/api/admin/tours/${encodeURIComponent(tour.id)}`, {
+        method: "DELETE",
+        credentials: "same-origin",
+        headers: { Accept: "application/json" },
+      });
+      const result = await response.json().catch(() => null) as { success?: boolean; error?: string } | null;
+      if (!response.ok || !result?.success) {
+        throw new Error(result?.error ?? "No se pudo eliminar la salida.");
+      }
+      onDeleted?.();
+    } catch (error) {
+      setDeleteError(error instanceof Error ? error.message : "No se pudo eliminar la salida.");
+    } finally {
+      setDeletePending(false);
+    }
   }
 
   function updateFact(index: number, patch: Partial<TourDetailCopy["facts"][number]>) {
@@ -164,10 +224,19 @@ function TourEditor({ tour, onDeleted }: { tour: TourRow | null; onDeleted?: () 
 
         <div className="flex flex-wrap items-center justify-end gap-2 sm:col-span-2">
           <button type="button" onClick={save} disabled={pending} className="gn-button disabled:opacity-50">{pending ? "Guardando…" : tour ? "Guardar" : "Agregar salida"}</button>
-          {tour ? <button type="button" onClick={remove} disabled={pending} aria-label="Eliminar" className="flex h-10 w-10 items-center justify-center rounded-lg border border-red-200 text-red-600"><Trash2 className="h-4 w-4" /></button> : null}
+          {tour ? <button type="button" onClick={() => { setDeleteError(null); setDeleteOpen(true); }} disabled={pending || deletePending} aria-label={`Eliminar ${tour.title}`} className="flex h-10 w-10 items-center justify-center rounded-lg border border-red-200 text-red-600 transition-colors hover:bg-red-50 disabled:opacity-50"><Trash2 className="h-4 w-4" /></button> : null}
         </div>
         {message ? <p className={`text-xs font-semibold sm:col-span-2 ${message.includes("publicados") ? "text-emerald-700" : "text-red-600"}`}>{message}</p> : null}
       </div>
+      {tour && deleteOpen ? (
+        <DeleteTourDialog
+          title={tour.title}
+          pending={deletePending}
+          error={deleteError}
+          onCancel={() => { if (!deletePending) setDeleteOpen(false); }}
+          onConfirm={remove}
+        />
+      ) : null}
     </article>
   );
 }

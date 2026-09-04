@@ -118,25 +118,6 @@ export async function upsertTour(raw: z.infer<typeof TourSchema>): Promise<Actio
   return { success: true };
 }
 
-export async function deleteTour(id: string): Promise<ActionState> {
-  await requireRole(["admin"]);
-  const supabase = createServiceRoleClient();
-  const { error } = await supabase.from("tours").delete().eq("id", id);
-  if (error) return { error: error.message };
-
-  const { data: block } = await supabase.from("content_blocks").select("data").eq("key", "guias").single();
-  if (block?.data && typeof block.data === "object" && !Array.isArray(block.data)) {
-    const blockData = block.data as Record<string, unknown>;
-    const tourDetails = blockData.tourDetails && typeof blockData.tourDetails === "object" && !Array.isArray(blockData.tourDetails)
-      ? { ...blockData.tourDetails as Record<string, unknown> }
-      : {};
-    delete tourDetails[id];
-    await supabase.from("content_blocks").update({ data: { ...blockData, tourDetails } }).eq("key", "guias");
-  }
-  revalidateTours();
-  return { success: true };
-}
-
 export async function reorderTours(orderedIds: string[]): Promise<ActionState> {
   await requireRole(["admin"]);
   const supabase = createServiceRoleClient();

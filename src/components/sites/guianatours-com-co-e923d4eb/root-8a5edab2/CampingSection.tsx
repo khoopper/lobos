@@ -8,7 +8,7 @@ import type { CampingBlock } from "@/lib/queries/site-content";
  */
 export function CampingSection({ block }: { block: CampingBlock }) {
   return (
-    <section id="nosotros" className="relative scroll-mt-4">
+    <section className="relative">
       <div className="mx-auto flex max-w-[1140px] flex-col max-[1024px]:max-w-none min-[768px]:flex-row">
         <div className="flex min-[768px]:w-2/3">
           <div className="-mt-[50px] w-full max-[767px]:mt-0">

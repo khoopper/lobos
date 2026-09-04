@@ -1,64 +1,48 @@
 import type { Metadata } from "next";
 import { Montserrat } from "next/font/google";
-import { getSiteSettings } from "@/lib/queries/site-content";
 import "./globals.css";
 
 const montserrat = Montserrat({
   variable: "--font-montserrat",
   subsets: ["latin"],
-  weight: ["400", "600", "700", "800"],
+  weight: ["400", "600", "700"],
   display: "swap",
 });
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://lobos-chi.vercel.app";
-const BRAND = "/brand/lobos";
-const TITLE = "Club de Lobos | Aventuras, camping y montaña";
-const DESCRIPTION =
-  "Somos un club de amigos que disfruta la aventura, el senderismo, el camping y vivir cada ruta al máximo.";
+const ASSETS = "/sites/guianatours-com-co-e923d4eb/root-8a5edab2";
 
-function brandSibling(faviconUrl: string | null, filename: string, fallback: string) {
-  if (!faviconUrl || !faviconUrl.includes("/")) return fallback;
-  const base = faviconUrl.slice(0, faviconUrl.lastIndexOf("/"));
-  return `${base}/${filename}`;
-}
+export const metadata: Metadata = {
+  metadataBase: new URL("https://guianatours.com.co/"),
+  title: "Guía Natours - Experiencia Inolvidables - Explora la Naturaleza",
+  description:
+    "Uno de nuestros destinos favoritos el el Parque Nacional Natural Chingaza, un lugar cargado de bosques, lagunas , páramo, venados y mucho más",
+  icons: {
+    icon: [
+      { url: `${ASSETS}/brand/favicon-32.png`, sizes: "32x32" },
+      { url: `${ASSETS}/brand/favicon-192.png`, sizes: "192x192" },
+    ],
+    apple: [{ url: `${ASSETS}/brand/apple-touch-icon.png`, sizes: "180x180" }],
+  },
+  openGraph: {
+    locale: "es_ES",
+    type: "website",
+    title: "Guía Natours - Experiencia Inolvidables - Explora la Naturaleza",
+    description:
+      "Uno de nuestros destinos favoritos el el Parque Nacional Natural Chingaza, un lugar cargado de bosques, lagunas , páramo, venados y mucho más",
+    url: "https://guianatours.com.co/",
+    siteName: "Guía Natours",
+    images: [{ url: `${ASSETS}/seo/og-image.jpeg`, width: 1500, height: 1000, type: "image/jpeg" }],
+  },
+};
 
-export async function generateMetadata(): Promise<Metadata> {
-  const settings = await getSiteSettings();
-  const favicon = settings.faviconUrl ?? `${BRAND}/favicon-32.png`;
-  const icon192 = brandSibling(settings.faviconUrl, "icon-192.png", `${BRAND}/icon-192.png`);
-  const apple = brandSibling(settings.faviconUrl, "apple-touch-icon.png", `${BRAND}/apple-touch-icon.png`);
-  const og = brandSibling(settings.faviconUrl, "og-image.png", `${BRAND}/og-image.png`);
-
-  return {
-    metadataBase: new URL(SITE_URL),
-    title: TITLE,
-    description: DESCRIPTION,
-    applicationName: "Club de Lobos",
-    alternates: { canonical: "/" },
-    icons: {
-      icon: [
-        { url: favicon, sizes: "32x32", type: "image/png" },
-        { url: icon192, sizes: "192x192", type: "image/png" },
-      ],
-      apple: [{ url: apple, sizes: "180x180", type: "image/png" }],
-    },
-    openGraph: {
-      locale: "es_SV",
-      type: "website",
-      title: TITLE,
-      description: DESCRIPTION,
-      url: "/",
-      siteName: "Club de Lobos",
-      images: [{ url: og, width: 1200, height: 630, type: "image/png", alt: "Club de Lobos" }],
-    },
-    twitter: { card: "summary_large_image", title: TITLE, description: DESCRIPTION, images: [og] },
-  };
-}
-
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
   return (
-    <html lang="es-SV" className={`${montserrat.variable} h-full scroll-smooth antialiased`}>
-      <body className="flex min-h-full flex-col">{children}</body>
+    <html lang="es" className={`${montserrat.variable} h-full antialiased`}>
+      <body className="min-h-full flex flex-col">{children}</body>
     </html>
   );
 }

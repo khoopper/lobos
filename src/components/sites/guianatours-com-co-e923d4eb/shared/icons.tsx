@@ -1,5 +1,5 @@
 /**
- * Lightweight SVG icons used by the Club de Lobos interface.
+ * SVG icons extracted verbatim from guianatours.com.co.
  * Kadence theme iconset (header) + Elementor / Font Awesome (footer) + eicons (slider arrows).
  */
 import type { SVGProps } from "react";

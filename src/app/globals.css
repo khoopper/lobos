@@ -128,16 +128,19 @@
     @apply font-sans;
   }
 }
-/* Club de Lobos — palette derived from the public Instagram identity. */
+/* ------------------------------------------------------------------
+   guianatours.com.co — design tokens (site-key guianatours-com-co-e923d4eb)
+   Values lifted verbatim from the Kadence palette on the live site.
+   ------------------------------------------------------------------ */
 :root {
-  --gn-palette-1: #1b3a2d;
-  --gn-palette-2: #0b0f0d;
-  --gn-palette-3: #17201a;
-  --gn-palette-4: #17201a;
-  --gn-palette-5: #556057;
-  --gn-palette-6: #778179;
-  --gn-palette-7: #e5b45f;
-  --gn-palette-8: #f5f3eb;
+  --gn-palette-1: #235652; /* primary teal — buttons, badges, footer */
+  --gn-palette-2: #183f3c; /* dark teal    — button hover, copyright bar */
+  --gn-palette-3: #373435; /* headings */
+  --gn-palette-4: #373435;
+  --gn-palette-5: #686c6a; /* body text */
+  --gn-palette-6: #686c6a;
+  --gn-palette-7: #f4f2be; /* pale yellow  — camping panel, active link */
+  --gn-palette-8: #fbfaec; /* cream        — page background */
   --gn-palette-9: #ffffff;
 
   --gn-btn-bg: var(--gn-palette-1);
@@ -176,7 +179,7 @@
   color: var(--gn-btn-fg);
   font-size: 15px;
   line-height: 15px;
-  font-weight: 700;
+  font-weight: 400;
   text-align: center;
   transition: 0.3s;
 }
@@ -197,7 +200,7 @@
 
 /* WooCommerce loop card shadow — rgba(35,86,82,.2) 0 20px 30px 0 */
 .gn-product-card {
-  box-shadow: rgba(11, 15, 13, 0.13) 0 18px 40px;
+  box-shadow: rgba(35, 86, 82, 0.2) 0px 20px 30px 0px;
 }
 
 /* Elementor `.elementor-widget-wrap` inset — 10px on the columns that carry it.
@@ -206,7 +209,7 @@
   padding: 10px;
 }
 
-/* Shared admin controls: compact, consistent and keyboard-visible. */
+/* Shared controls used only by the redesigned administration panel. */
 .admin-card {
   border: 1px solid rgb(23 32 26 / 9%);
   border-radius: 16px;
@@ -228,11 +231,6 @@
 
 .admin-input:focus {
   border-color: var(--gn-palette-1);
-  box-shadow: 0 0 0 3px rgb(27 58 45 / 12%);
+  box-shadow: 0 0 0 3px rgb(35 86 82 / 12%);
   outline: none;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  html { scroll-behavior: auto; }
-  *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
 }

@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import Image from "next/image";
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -48,7 +47,7 @@ export function HeroSlider({ slides }: { slides: HeroSlide[] }) {
 
   return (
     <section
-      className="relative h-[700px] w-full overflow-hidden bg-[var(--gn-palette-2)] max-[1024px]:h-[560px]"
+      className="relative h-[700px] w-full overflow-hidden bg-[var(--gn-palette-2)] max-[1024px]:h-[450px]"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
       aria-roledescription="carousel"
@@ -70,26 +69,24 @@ export function HeroSlider({ slides }: { slides: HeroSlide[] }) {
             aria-label={`${i + 1} de ${count}`}
             aria-hidden={i !== safeIndex}
           >
-            <Image
-              src={slide.image}
-              alt=""
-              fill
-              priority={i === 0}
-              sizes="100vw"
-              className="object-cover object-center"
+            {/* .swiper-slide-bg — cover, centred, no overlay tint */}
+            <div
+              className="absolute inset-0 bg-[var(--gn-palette-2)] bg-cover bg-center bg-no-repeat"
+              style={{ backgroundImage: `url("${slide.image}")` }}
+              role="img"
+              aria-label={slide.heading}
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-black/30" />
             {/* .swiper-slide-inner — the whole slide is one link */}
             <a
               href={slide.href}
               tabIndex={i === safeIndex ? undefined : -1}
-              className="absolute inset-0 mx-auto flex max-w-[1280px] items-end justify-start px-12 pb-20 pt-36 text-left text-white transition-all duration-100 ease-linear max-[767px]:px-6 max-[767px]:pb-12"
+              className="absolute inset-0 mx-auto flex max-w-[1280px] items-end justify-start p-[50px] text-left text-white transition-all duration-100 ease-linear max-[767px]:p-[30px]"
             >
               <div className="w-[600px] max-w-full">
-                <div className="mb-3 text-[44px] leading-[1.05] font-extrabold tracking-tight text-white max-[767px]:text-[32px]">
+                <div className="mb-[5px] text-[35px] leading-[35px] font-bold text-white max-[767px]:text-[23px] max-[767px]:leading-[23px]">
                   {slide.heading}
                 </div>
-                <div className="mb-7 max-w-xl text-[17px] leading-7 font-normal text-white/90 max-[767px]:text-sm max-[767px]:leading-6">
+                <div className="mb-[30px] text-[17px] leading-[23.8px] font-normal text-white max-[767px]:text-[13px] max-[767px]:leading-[18.2px]">
                   {slide.description}
                 </div>
                 <div className="gn-button">{slide.buttonLabel}</div>

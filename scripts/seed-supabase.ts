@@ -1,0 +1,182 @@
+/**
+ * One-time seed: reads the site's current content verbatim from
+ * `content.ts` and inserts it into Supabase.
+ *
+ * `site_settings` (update) and `tours`/`content_blocks` (upsert on a natural
+ * unique key) are safe to re-run. `nav_links`, `hero_slides`, `gallery_items`
+ * and `reviews` have no natural unique column — those four are meant to run
+ * exactly once against an empty database; re-running this script after the
+ * admin panel has been used would duplicate them.
+ *
+ * `content.ts` itself is untouched and stays in the repo afterward as an
+ * unused rollback reference (see the approved plan).
+ *
+ * Usage:
+ *   npx tsx scripts/seed-supabase.ts
+ *
+ * Requires (from `.env.local` or the shell environment):
+ *   NEXT_PUBLIC_SUPABASE_URL
+ *   SUPABASE_SERVICE_ROLE_KEY   (service role — bypasses RLS; never expose client-side)
+ */
+import { createClient } from "@supabase/supabase-js";
+import {
+  CAMPING,
+  EMAIL,
+  FOOTER,
+  FOTOGRAFIAS,
+  GALLERY,
+  GUIAS,
+  HERO_SLIDES,
+  NAV_LINKS,
+  PHONE_HREF,
+  PHONE_LABEL,
+  PRODUCTS,
+  REVIEWS,
+  REVIEWS_SUMMARY,
+  SOCIAL_LINKS,
+} from "../src/components/sites/guianatours-com-co-e923d4eb/root-8a5edab2/content";
+
+try {
+  process.loadEnvFile(".env.local");
+} catch {
+  // .env.local may not exist yet in CI — fall back to whatever is already in the environment.
+}
+
+const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+if (!url || !serviceKey) {
+  console.error(
+    "Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY. Add them to .env.local first.",
+  );
+  process.exit(1);
+}
+
+const supabase = createClient(url, serviceKey, { auth: { persistSession: false } });
+
+/** Real, downloaded-file dimensions (JPEG SOF marker, verified 1440×713 for all four). */
+const HERO_IMAGE_SIZE = { w: 1440, h: 713 };
+/** WooCommerce `woocommerce_thumbnail` size — matches the fixed width/height ProductCard passes to next/image. */
+const TOUR_IMAGE_SIZE = { w: 600, h: 360 };
+
+/** The six tours' "Próxima salida" strings, parsed into real dates by hand (only six, known values). */
+const TOUR_DEPARTURES: Record<string, { start: string; end: string | null }> = {
+  "tour-farallones-sutatausa": { start: "2026-09-12", end: null },
+  "tour-lagunas-siecha": { start: "2026-09-12", end: null },
+  "tour-tatacoa": { start: "2026-09-19", end: "2026-09-20" },
+  "tour-chingaza-kids": { start: "2026-09-19", end: null },
+  "tour-camping-chingaza": { start: "2026-09-19", end: "2026-09-20" },
+  "tour-penas-blancas": { start: "2026-09-20", end: null },
+};
+
+async function main() {
+  console.log("Seeding site_settings...");
+  const { error: settingsErr } = await supabase
+    .from("site_settings")
+    .update({
+      logo_header_url: "/sites/guianatours-com-co-e923d4eb/root-8a5edab2/brand/logo-oso.png",
+      logo_footer_url: "/sites/guianatours-com-co-e923d4eb/root-8a5edab2/brand/logo-blanco.png",
+      favicon_url: "/sites/guianatours-com-co-e923d4eb/root-8a5edab2/brand/favicon-32.png",
+      phone_label: PHONE_LABEL,
+      phone_href: PHONE_HREF,
+      email: EMAIL,
+      social_facebook_url: SOCIAL_LINKS.find((s) => s.network === "facebook")?.href,
+      social_instagram_url: SOCIAL_LINKS.find((s) => s.network === "instagram")?.href,
+      social_youtube_url: SOCIAL_LINKS.find((s) => s.network === "youtube")?.href,
+      footer_registro: FOOTER.registro,
+      footer_copyright: FOOTER.copyright,
+      footer_credit_label: FOOTER.designer.label,
+      footer_credit_href: FOOTER.designer.href ?? null,
+    })
+    .eq("id", 1);
+  if (settingsErr) throw settingsErr;
+
+  console.log("Seeding nav_links...");
+  const { error: navErr } = await supabase.from("nav_links").insert(
+    NAV_LINKS.map((link, i) => ({ label: link.label, href: link.href, is_active: true, sort_order: i })),
+  );
+  if (navErr) throw navErr;
+
+  console.log("Seeding hero_slides...");
+  const { error: heroErr } = await supabase.from("hero_slides").insert(
+    HERO_SLIDES.map((slide, i) => ({
+      image_url: slide.image,
+      image_w: HERO_IMAGE_SIZE.w,
+      image_h: HERO_IMAGE_SIZE.h,
+      heading: slide.heading,
+      description: slide.description,
+      button_label: slide.buttonLabel,
+      href: slide.href,
+      sort_order: i,
+    })),
+  );
+  if (heroErr) throw heroErr;
+
+  console.log("Seeding tours...");
+  const { error: toursErr } = await supabase.from("tours").upsert(
+    PRODUCTS.map((p, i) => {
+      const dep = TOUR_DEPARTURES[p.id];
+      return {
+        slug: p.id,
+        title: p.title,
+        price: p.price,
+        currency_symbol: p.currencySymbol,
+        departure_start: dep.start,
+        departure_end: dep.end,
+        image_url: p.image,
+        image_w: TOUR_IMAGE_SIZE.w,
+        image_h: TOUR_IMAGE_SIZE.h,
+        hover_image_url: p.hoverImage,
+        hover_image_w: TOUR_IMAGE_SIZE.w,
+        hover_image_h: TOUR_IMAGE_SIZE.h,
+        button_label: p.buttonLabel,
+        sort_order: i,
+      };
+    }),
+    { onConflict: "slug" },
+  );
+  if (toursErr) throw toursErr;
+
+  console.log("Seeding content_blocks...");
+  const { error: blocksErr } = await supabase.from("content_blocks").upsert([
+    { key: "guias", data: GUIAS },
+    { key: "camping", data: CAMPING },
+    { key: "fotografias", data: FOTOGRAFIAS },
+  ]);
+  if (blocksErr) throw blocksErr;
+
+  console.log("Seeding gallery_items...");
+  const { error: galleryErr } = await supabase.from("gallery_items").insert(
+    GALLERY.map((item, i) => ({
+      image_url: item.thumb,
+      image_w: item.width,
+      image_h: item.height,
+      title: item.title,
+      sort_order: i,
+    })),
+  );
+  if (galleryErr) throw galleryErr;
+
+  console.log("Seeding reviews...");
+  const { error: reviewsErr } = await supabase.from("reviews").insert(
+    REVIEWS.map((r, i) => ({
+      author: r.author,
+      review_date: r.isoDate,
+      rating: r.rating,
+      body_text: r.text,
+      sort_order: i,
+    })),
+  );
+  if (reviewsErr) throw reviewsErr;
+
+  console.log(
+    `Done. Seeded 1 site_settings row, ${NAV_LINKS.length} nav links, ${HERO_SLIDES.length} hero slides, ` +
+      `${PRODUCTS.length} tours, 3 content blocks, ${GALLERY.length} gallery items, ${REVIEWS.length} reviews. ` +
+      `Reviews summary (${REVIEWS_SUMMARY.rating}, ${REVIEWS_SUMMARY.countLabel}) is not seeded — it has no admin ` +
+      `screen yet in this phase and stays a static constant in content.ts for now.`,
+  );
+}
+
+main().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});

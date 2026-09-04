@@ -21,7 +21,7 @@ import type { GalleryItem } from "@/types/guianatours-com-co-e923d4eb";
 export function FotografiasSemana({ block, gallery }: { block: FotografiasBlock; gallery: GalleryItem[] }) {
   return (
     <>
-      <section id="galeria" className="scroll-mt-4 px-5 pb-[10px] pt-16">
+      <section className="px-5 pb-[10px] pt-10">
         <div className="mx-auto max-w-[1140px]">
           <div className="gn-widget-wrap">
             <h2 className="mb-3 text-center text-2xl leading-6 font-bold text-[var(--gn-palette-3)]">

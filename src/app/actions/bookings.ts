@@ -39,6 +39,14 @@ export async function createBooking(raw: unknown): Promise<BookingState> {
 
   const supabase = await createClient();
 
+  // The public form only ever renders a <select> of the tour's configured
+  // dates, but that's a client-side constraint — re-check it here so a
+  // hand-crafted request can't book an arbitrary date the admin never set.
+  const { data: tour } = await supabase.from("tours").select("departure_dates").eq("id", d.tourId).maybeSingle();
+  if (!tour || !tour.departure_dates.includes(d.requestedDate)) {
+    return { error: "Esa fecha ya no está disponible para esta salida." };
+  }
+
   // Basic throttle: refuse a second request from the same email within 2 minutes.
   const twoMinutesAgo = new Date(Date.now() - 2 * 60 * 1000).toISOString();
   const { count } = await supabase

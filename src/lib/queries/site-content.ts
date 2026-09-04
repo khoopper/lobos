@@ -26,13 +26,16 @@ const MONTHS_ES = [
   "Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic",
 ] as const;
 
-/** Renders "12 Sep 2026" or "19 Sep 2026 a 20 Sep 2026" — the exact style scraped from the source site. */
-function formatDeparture(start: string, end: string | null): string {
-  const fmt = (iso: string) => {
-    const [y, m, d] = iso.split("-").map(Number);
-    return `${d} ${MONTHS_ES[m - 1]} ${y}`;
-  };
-  return end ? `${fmt(start)} a ${fmt(end)}` : fmt(start);
+function formatDate(iso: string): string {
+  const [y, m, d] = iso.split("-").map(Number);
+  return `${d} ${MONTHS_ES[m - 1]} ${y}`;
+}
+
+/** The soonest date that hasn't passed yet, or the last one if every configured date is already past. */
+function nextDepartureDate(dates: string[]): string | null {
+  if (dates.length === 0) return null;
+  const today = new Date().toISOString().slice(0, 10);
+  return dates.find((date) => date >= today) ?? dates[dates.length - 1];
 }
 
 export interface SiteSettingsData {
@@ -126,52 +129,54 @@ export async function getTours(): Promise<ProductCard[]> {
   const supabase = createPublicClient();
   const { data } = await supabase
     .from("tours")
-    .select("id, slug, title, price, currency_symbol, departure_start, departure_end, images, button_label")
+    .select("id, slug, title, price, currency_symbol, departure_dates, images, button_label")
     .order("sort_order");
 
-  return (data ?? []).map((t) => ({
-    id: t.id,
-    title: t.title,
-    price: t.price,
-    currencySymbol: t.currency_symbol,
-    nextDeparture: formatDeparture(t.departure_start, t.departure_end),
-    image: t.images[0]?.url ?? "",
-    hoverImage: t.images[1]?.url ?? t.images[0]?.url ?? "",
-    href: `/salidas/${encodeURIComponent(t.slug)}`,
-    buttonLabel: t.button_label,
-  }));
+  return (data ?? []).map((t) => {
+    const next = nextDepartureDate(t.departure_dates);
+    return {
+      id: t.id,
+      title: t.title,
+      price: t.price,
+      currencySymbol: t.currency_symbol,
+      nextDeparture: next ? formatDate(next) : "Fechas por confirmar",
+      image: t.images[0]?.url ?? "",
+      hoverImage: t.images[1]?.url ?? t.images[0]?.url ?? "",
+      href: `/salidas/${encodeURIComponent(t.slug)}`,
+      buttonLabel: t.button_label,
+    };
+  });
 }
 
 export interface CalendarTourData {
   id: string;
   slug: string;
   title: string;
-  departureStart: string;
-  departureEnd: string | null;
+  departureDate: string;
   imageUrl: string;
   price: string;
   currencySymbol: string;
 }
 
+/** One entry per (tour, departure date) pair — a tour with 3 configured
+ * dates shows up on all 3 days on the calendar. */
 export async function getCalendarTours(): Promise<CalendarTourData[]> {
   const supabase = createPublicClient();
   const { data } = await supabase
     .from("tours")
-    .select("id, slug, title, departure_start, departure_end, images, price, currency_symbol, sort_order")
+    .select("id, slug, title, departure_dates, images, price, currency_symbol, sort_order")
     .eq("is_published", true)
-    .order("departure_start")
     .order("sort_order");
 
-  return (data ?? []).map((tour) => ({
-    id: tour.id,
+  return (data ?? []).flatMap((tour) => tour.departure_dates.map((date) => ({
+    id: `${tour.id}-${date}`,
     slug: tour.slug,
     title: tour.title,
-    departureStart: tour.departure_start,
-    departureEnd: tour.departure_end,
+    departureDate: date,
     imageUrl: tour.images[0]?.url ?? "",
     price: tour.price,
     currencySymbol: tour.currency_symbol,
-  }));
+  }))).sort((a, b) => a.departureDate.localeCompare(b.departureDate));
 }
 
 export interface TourDetailData {
@@ -180,8 +185,7 @@ export interface TourDetailData {
   title: string;
   price: string;
   currencySymbol: string;
-  departureStart: string;
-  departureEnd: string | null;
+  departureDates: string[];
   images: { url: string; width: number; height: number }[];
 }
 
@@ -189,7 +193,7 @@ export async function getTourBySlug(slug: string): Promise<TourDetailData | null
   const supabase = createPublicClient();
   const { data } = await supabase
     .from("tours")
-    .select("id, slug, title, price, currency_symbol, departure_start, departure_end, images")
+    .select("id, slug, title, price, currency_symbol, departure_dates, images")
     .eq("slug", slug)
     .eq("is_published", true)
     .maybeSingle();
@@ -201,8 +205,7 @@ export async function getTourBySlug(slug: string): Promise<TourDetailData | null
     title: data.title,
     price: data.price,
     currencySymbol: data.currency_symbol,
-    departureStart: data.departure_start,
-    departureEnd: data.departure_end,
+    departureDates: data.departure_dates,
     images: data.images,
   };
 }

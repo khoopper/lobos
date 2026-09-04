@@ -59,13 +59,13 @@ const HERO_IMAGE_SIZE = { w: 1440, h: 713 };
 const TOUR_IMAGE_SIZE = { w: 600, h: 360 };
 
 /** The six tours' "Próxima salida" strings, parsed into real dates by hand (only six, known values). */
-const TOUR_DEPARTURES: Record<string, { start: string; end: string | null }> = {
-  "tour-farallones-sutatausa": { start: "2026-09-12", end: null },
-  "tour-lagunas-siecha": { start: "2026-09-12", end: null },
-  "tour-tatacoa": { start: "2026-09-19", end: "2026-09-20" },
-  "tour-chingaza-kids": { start: "2026-09-19", end: null },
-  "tour-camping-chingaza": { start: "2026-09-19", end: "2026-09-20" },
-  "tour-penas-blancas": { start: "2026-09-20", end: null },
+const TOUR_DEPARTURES: Record<string, string[]> = {
+  "tour-farallones-sutatausa": ["2026-09-12"],
+  "tour-lagunas-siecha": ["2026-09-12"],
+  "tour-tatacoa": ["2026-09-19", "2026-09-20"],
+  "tour-chingaza-kids": ["2026-09-19"],
+  "tour-camping-chingaza": ["2026-09-19", "2026-09-20"],
+  "tour-penas-blancas": ["2026-09-20"],
 };
 
 async function main() {
@@ -121,14 +121,12 @@ async function main() {
   console.log("Seeding tours...");
   const { error: toursErr } = await supabase.from("tours").upsert(
     PRODUCTS.map((p, i) => {
-      const dep = TOUR_DEPARTURES[p.id];
       return {
         slug: p.id,
         title: p.title,
         price: p.price,
         currency_symbol: p.currencySymbol,
-        departure_start: dep.start,
-        departure_end: dep.end,
+        departure_dates: TOUR_DEPARTURES[p.id],
         images: [
           { url: p.image, width: TOUR_IMAGE_SIZE.w, height: TOUR_IMAGE_SIZE.h },
           { url: p.hoverImage, width: TOUR_IMAGE_SIZE.w, height: TOUR_IMAGE_SIZE.h },

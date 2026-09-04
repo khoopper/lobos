@@ -17,7 +17,7 @@ function dateParts(iso: string) {
 
 function initialMonth(tours: CalendarTourData[]) {
   const today = new Date();
-  const sorted = tours.map((tour) => dateParts(tour.departureStart)).sort((a, b) =>
+  const sorted = tours.map((tour) => dateParts(tour.departureDate)).sort((a, b) =>
     new Date(a.year, a.month, a.day).getTime() - new Date(b.year, b.month, b.day).getTime());
   const upcoming = sorted.find((date) => new Date(date.year, date.month + 1, 0) >= today);
   return upcoming ?? sorted[0] ?? { year: today.getFullYear(), month: today.getMonth(), day: 1 };
@@ -50,7 +50,7 @@ export function AdventureCalendar({ tours }: { tours: CalendarTourData[] }) {
   }
 
   const monthTours = tours.filter((tour) => {
-    const date = dateParts(tour.departureStart);
+    const date = dateParts(tour.departureDate);
     return date.year === visible.year && date.month === visible.month;
   });
 
@@ -69,7 +69,7 @@ export function AdventureCalendar({ tours }: { tours: CalendarTourData[] }) {
       <div className="hidden grid-cols-7 border-l border-black/10 sm:grid">
         {WEEKDAYS.map((weekday) => <div key={weekday} className="border-b border-r border-black/10 bg-[var(--gn-palette-8)] px-2 py-3 text-center text-xs font-extrabold text-[var(--gn-palette-3)]">{weekday}</div>)}
         {cells.map((cell, index) => {
-          const events = cell.current ? monthTours.filter((tour) => dateParts(tour.departureStart).day === cell.day) : [];
+          const events = cell.current ? monthTours.filter((tour) => dateParts(tour.departureDate).day === cell.day) : [];
           return (
             <div key={`${cell.offset}-${cell.day}-${index}`} className={`min-h-32 border-b border-r border-black/10 p-2 ${cell.current ? "bg-white" : "bg-black/[.025]"}`}>
               <span className={`text-xs font-bold ${cell.current ? "text-[var(--gn-palette-3)]" : "text-black/25"}`}>{cell.day}</span>
@@ -77,7 +77,6 @@ export function AdventureCalendar({ tours }: { tours: CalendarTourData[] }) {
                 {events.map((tour) => (
                   <a key={tour.id} href={`/salidas/${encodeURIComponent(tour.slug)}`} className="block rounded-md bg-[var(--gn-palette-1)] p-2 text-[10px] font-bold leading-4 text-white transition-colors hover:bg-[var(--gn-palette-2)]">
                     {tour.title}
-                    {tour.departureEnd ? <span className="mt-1 block font-normal opacity-80">Regreso: {formatDate(tour.departureEnd)}</span> : null}
                   </a>
                 ))}
               </div>
@@ -91,9 +90,8 @@ export function AdventureCalendar({ tours }: { tours: CalendarTourData[] }) {
           <div className="space-y-3">
             {monthTours.map((tour) => (
               <a key={tour.id} href={`/salidas/${encodeURIComponent(tour.slug)}`} className="block rounded-xl border border-black/10 p-4">
-                <span className="text-xs font-bold text-[var(--gn-palette-1)]">{formatDate(tour.departureStart)}</span>
+                <span className="text-xs font-bold text-[var(--gn-palette-1)]">{formatDate(tour.departureDate)}</span>
                 <strong className="mt-1 block text-sm text-[var(--gn-palette-3)]">{tour.title}</strong>
-                {tour.departureEnd ? <span className="mt-1 block text-xs text-[var(--gn-palette-5)]">Regreso: {formatDate(tour.departureEnd)}</span> : null}
               </a>
             ))}
           </div>

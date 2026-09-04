@@ -50,9 +50,8 @@ export async function generateMetadata({ params }: TourPageProps): Promise<Metad
   const { slug } = await params;
   const [tour, storedDetails] = await Promise.all([getTourBySlug(slug), getStoredTourDetailRecord()]);
   if (!tour) return { title: "Salida no encontrada", robots: { index: false, follow: false } };
-  const duration = getDuration(tour.departureStart, tour.departureEnd);
   const price = [tour.currencySymbol, tour.price].filter(Boolean).join(" ");
-  const detail = resolveTourDetailCopy({ id: tour.id, slug, duration, price }, storedDetails);
+  const detail = resolveTourDetailCopy({ id: tour.id, slug, price }, storedDetails);
   return {
     title: tour.title,
     description: detail.lead,
@@ -63,14 +62,6 @@ export async function generateMetadata({ params }: TourPageProps): Promise<Metad
       images: tour.images.slice(0, 1),
     },
   };
-}
-
-function getDuration(start: string, end: string | null) {
-  if (!end) return "1 día";
-  const startDate = new Date(`${start}T00:00:00Z`);
-  const endDate = new Date(`${end}T00:00:00Z`);
-  const days = Math.max(1, Math.round((endDate.getTime() - startDate.getTime()) / 86_400_000) + 1);
-  return `${days} días`;
 }
 
 const FACT_ICONS: Record<TourIconId, typeof Activity> = {
@@ -160,14 +151,13 @@ export default async function TourPage({ params }: TourPageProps) {
   ]);
   if (!tour) notFound();
 
-  const duration = getDuration(tour.departureStart, tour.departureEnd);
   const price = [tour.currencySymbol, tour.price].filter(Boolean).join(" ");
-  const detail = resolveTourDetailCopy({ id: tour.id, slug, duration, price }, storedDetails);
+  const detail = resolveTourDetailCopy({ id: tour.id, slug, price }, storedDetails);
+  const duration = detail.facts.find((fact) => fact.key === "time")?.value ?? "Por confirmar";
   const eventJsonLd = buildTourEventJsonLd({
     title: tour.title,
     slug,
-    departureStart: tour.departureStart,
-    departureEnd: tour.departureEnd,
+    departureDates: tour.departureDates,
     description: detail.lead,
     imageUrl: tour.images[0]?.url,
     price: tour.price,
@@ -273,7 +263,7 @@ export default async function TourPage({ params }: TourPageProps) {
             <TourBookingPanel
               tourId={tour.id}
               tourTitle={tour.title}
-              departureStart={tour.departureStart}
+              departureDates={tour.departureDates}
               duration={duration}
               price={price}
             />

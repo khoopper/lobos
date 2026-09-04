@@ -86,8 +86,7 @@ export interface Database {
           title: string;
           price: string;
           currency_symbol: string;
-          departure_start: string;
-          departure_end: string | null;
+          departure_dates: string[];
           images: TourImage[];
           button_label: string;
           sort_order: number;

@@ -9,8 +9,13 @@ export interface BookingDialogProps {
   onClose: () => void;
   tourId: string;
   tourTitle: string;
+  availableDates: string[];
   initialDate?: string;
   initialPeople?: number;
+}
+
+function formatDate(iso: string) {
+  return new Date(`${iso}T00:00:00Z`).toLocaleDateString("es-SV", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
 }
 
 /**
@@ -25,6 +30,7 @@ export function BookingDialog({
   onClose,
   tourId,
   tourTitle,
+  availableDates,
   initialDate = "",
   initialPeople = 1,
 }: BookingDialogProps) {
@@ -118,7 +124,10 @@ export function BookingDialog({
             <div className="flex gap-3">
               <label className="flex flex-1 flex-col gap-1 text-sm text-[var(--gn-palette-3)]">
                 Fecha deseada
-                <input name="requestedDate" type="date" defaultValue={initialDate} required className={inputCls} />
+                <select name="requestedDate" defaultValue={initialDate} required className={inputCls}>
+                  {availableDates.length === 0 ? <option value="">Sin fechas disponibles</option> : null}
+                  {availableDates.map((date) => <option key={date} value={date}>{formatDate(date)}</option>)}
+                </select>
               </label>
               <label className="flex w-28 flex-col gap-1 text-sm text-[var(--gn-palette-3)]">
                 Personas

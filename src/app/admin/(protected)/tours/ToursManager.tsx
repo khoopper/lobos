@@ -7,6 +7,7 @@ import {
   Gauge, Mountain, Plus, Route, TentTree, Thermometer, Trash2, TrendingUp, Trees,
   UsersRound, Waves, X,
 } from "lucide-react";
+import { AddImageTile } from "@/components/admin/AddImageTile";
 import { ImageUploader } from "@/components/admin/ImageUploader";
 import { Modal } from "@/components/admin/Modal";
 import {
@@ -25,8 +26,7 @@ export interface TourRow {
   title: string;
   price: string;
   currency_symbol: string;
-  departure_start: string;
-  departure_end: string | null;
+  departure_dates: string[];
   images: TourImage[];
   button_label: string;
   is_published: boolean;
@@ -34,11 +34,16 @@ export interface TourRow {
 }
 
 const MAX_IMAGES = 5;
+const MAX_DATES = 10;
 const inputCls = "admin-input h-10 px-3";
 const EMPTY: Omit<TourRow, "id"> = {
-  slug: "", title: "", price: "Consultar", currency_symbol: "$", departure_start: "", departure_end: null,
-  images: [{ url: "", width: 0, height: 0 }], button_label: "Ver salida", is_published: true, details: getDefaultTourDetail(""),
+  slug: "", title: "", price: "Consultar", currency_symbol: "$", departure_dates: [],
+  images: [], button_label: "Ver salida", is_published: true, details: getDefaultTourDetail(""),
 };
+
+function formatDeparture(iso: string) {
+  return new Date(`${iso}T00:00:00Z`).toLocaleDateString("es-SV", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
+}
 
 const ICONS: Record<TourIconId, typeof Activity> = {
   compass: Compass, activity: Activity, gauge: Gauge, clock: Clock3,
@@ -101,6 +106,7 @@ function DeleteTourDialog({
 
 function TourEditor({ tour, onDeleted, onSaved }: { tour: TourRow | null; onDeleted?: () => void; onSaved?: (row: TourRow) => void }) {
   const [form, setForm] = useState(tour ?? EMPTY);
+  const [pendingDate, setPendingDate] = useState("");
   const [pending, startTransition] = useTransition();
   const [message, setMessage] = useState<string | null>(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -110,6 +116,7 @@ function TourEditor({ tour, onDeleted, onSaved }: { tour: TourRow | null; onDele
   function save() {
     const images = form.images.filter((image) => image.url);
     if (images.length === 0) { setMessage("Agrega al menos una imagen."); return; }
+    if (form.departure_dates.length === 0) { setMessage("Agrega al menos una fecha de salida."); return; }
     setMessage(null);
     startTransition(async () => {
       const result = await upsertTour({
@@ -118,8 +125,7 @@ function TourEditor({ tour, onDeleted, onSaved }: { tour: TourRow | null; onDele
         title: form.title,
         price: form.price,
         currencySymbol: form.currency_symbol,
-        departureStart: form.departure_start,
-        departureEnd: form.departure_end || null,
+        departureDates: form.departure_dates,
         images,
         buttonLabel: form.button_label,
         isPublished: form.is_published,
@@ -143,12 +149,23 @@ function TourEditor({ tour, onDeleted, onSaved }: { tour: TourRow | null; onDele
     });
   }
 
-  function addImageSlot() {
-    setForm((current) => (current.images.length >= MAX_IMAGES ? current : { ...current, images: [...current.images, { url: "", width: 0, height: 0 }] }));
+  function addImage(image: TourImage) {
+    setForm((current) => (current.images.length >= MAX_IMAGES ? current : { ...current, images: [...current.images, image] }));
   }
 
   function removeImage(index: number) {
     setForm((current) => ({ ...current, images: current.images.filter((_, i) => i !== index) }));
+  }
+
+  function addDate(date: string) {
+    setForm((current) => {
+      if (!date || current.departure_dates.includes(date) || current.departure_dates.length >= MAX_DATES) return current;
+      return { ...current, departure_dates: [...current.departure_dates, date].sort() };
+    });
+  }
+
+  function removeDate(date: string) {
+    setForm((current) => ({ ...current, departure_dates: current.departure_dates.filter((d) => d !== date) }));
   }
 
   async function remove() {
@@ -189,29 +206,20 @@ function TourEditor({ tour, onDeleted, onSaved }: { tour: TourRow | null; onDele
         <p className="mb-2 text-xs font-bold text-[var(--gn-palette-3)]">Fotos (máximo 5)</p>
         <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
           {form.images.map((image, index) => (
-            <div key={index} className="relative">
+            <div key={image.url} className="relative">
               <ImageUploader
                 bucket="media"
-                value={image.url ? image : null}
+                value={image}
                 onChange={(next) => setImage(index, next)}
                 previewClassName="aspect-square w-full rounded-lg object-cover"
               />
-              {form.images.length > 1 ? (
-                <button type="button" onClick={() => removeImage(index)} aria-label="Quitar imagen" className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-black/60 text-white hover:bg-black/80">
-                  <X className="h-3 w-3" />
-                </button>
-              ) : null}
+              <button type="button" onClick={() => removeImage(index)} aria-label="Quitar imagen" className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-black/60 text-white hover:bg-black/80">
+                <X className="h-3 w-3" />
+              </button>
             </div>
           ))}
           {form.images.length < MAX_IMAGES ? (
-            <button
-              type="button"
-              onClick={addImageSlot}
-              className="flex aspect-square w-full flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-[#cfd6d0] bg-[#f8f9f7] text-[11px] font-semibold text-[var(--gn-palette-5)] hover:border-[var(--gn-palette-1)] hover:text-[var(--gn-palette-1)]"
-            >
-              <Plus className="h-4 w-4" />
-              Agregar
-            </button>
+            <AddImageTile bucket="media" onAdded={addImage} className="flex aspect-square w-full flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-[#cfd6d0] bg-[#f8f9f7] text-[11px] font-semibold text-[var(--gn-palette-5)] transition-colors hover:border-[var(--gn-palette-1)] hover:text-[var(--gn-palette-1)]" />
           ) : null}
         </div>
       </div>
@@ -223,10 +231,36 @@ function TourEditor({ tour, onDeleted, onSaved }: { tour: TourRow | null; onDele
           <Field label="Moneda"><input className={inputCls} value={form.currency_symbol} onChange={(e) => setForm((current) => ({ ...current, currency_symbol: e.target.value }))} placeholder="$" /></Field>
           <Field label="Precio"><input className={inputCls} value={form.price} onChange={(e) => setForm((current) => ({ ...current, price: e.target.value }))} /></Field>
         </div>
-        <Field label="Fecha de salida"><input type="date" className={inputCls} value={form.departure_start} onChange={(e) => setForm((current) => ({ ...current, departure_start: e.target.value }))} /></Field>
-        <Field label="Fecha final (opcional)"><input type="date" className={inputCls} value={form.departure_end ?? ""} onChange={(e) => setForm((current) => ({ ...current, departure_end: e.target.value || null }))} /></Field>
         <Field label="Texto del botón"><input className={inputCls} value={form.button_label} onChange={(e) => setForm((current) => ({ ...current, button_label: e.target.value }))} /></Field>
         <div className="flex items-end"><label className="flex h-10 items-center gap-2 text-xs font-semibold text-[var(--gn-palette-3)]"><input type="checkbox" checked={form.is_published} onChange={(e) => setForm((current) => ({ ...current, is_published: e.target.checked }))} />Publicado</label></div>
+
+        <Field label={`Fechas de salida (${form.departure_dates.length}/${MAX_DATES})`} className="sm:col-span-2">
+          {form.departure_dates.length > 0 ? (
+            <div className="mb-2 flex flex-wrap gap-2">
+              {form.departure_dates.map((date) => (
+                <span key={date} className="inline-flex items-center gap-1.5 rounded-full bg-[var(--gn-palette-8)] py-1 pl-3 pr-1.5 text-xs font-semibold text-[var(--gn-palette-3)]">
+                  {formatDeparture(date)}
+                  <button type="button" onClick={() => removeDate(date)} aria-label={`Quitar ${formatDeparture(date)}`} className="flex h-4 w-4 items-center justify-center rounded-full text-[var(--gn-palette-5)] hover:bg-black/10">
+                    <X className="h-3 w-3" />
+                  </button>
+                </span>
+              ))}
+            </div>
+          ) : null}
+          {form.departure_dates.length < MAX_DATES ? (
+            <div className="flex gap-2">
+              <input type="date" className={inputCls} value={pendingDate} onChange={(e) => setPendingDate(e.target.value)} />
+              <button
+                type="button"
+                onClick={() => { if (pendingDate) { addDate(pendingDate); setPendingDate(""); } }}
+                disabled={!pendingDate}
+                className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-[#d9ded9] px-3 text-xs font-bold text-[var(--gn-palette-3)] transition-colors hover:bg-[var(--gn-palette-8)] disabled:opacity-50"
+              >
+                <Plus className="h-3.5 w-3.5" />Agregar fecha
+              </button>
+            </div>
+          ) : null}
+        </Field>
 
         <details className="rounded-xl border border-[#e2e6e2] bg-[#fafbfa] sm:col-span-2">
           <summary className="cursor-pointer px-4 py-3 text-sm font-extrabold text-[var(--gn-palette-3)]">Información completa e íconos de la salida</summary>
@@ -283,9 +317,16 @@ function TourEditor({ tour, onDeleted, onSaved }: { tour: TourRow | null; onDele
   );
 }
 
+function nearestDeparture(dates: string[]): string | null {
+  if (dates.length === 0) return null;
+  const today = new Date().toISOString().slice(0, 10);
+  return dates.find((date) => date >= today) ?? dates[dates.length - 1];
+}
+
 function TourCard({ tour, index, total, onEdit, onMove }: {
   tour: TourRow; index: number; total: number; onEdit: () => void; onMove: (delta: number) => void;
 }) {
+  const next = nearestDeparture(tour.departure_dates);
   return (
     <div className="admin-card overflow-hidden">
       <button type="button" onClick={onEdit} className="flex w-full flex-col text-left">
@@ -297,7 +338,7 @@ function TourCard({ tour, index, total, onEdit, onMove }: {
         <span className="flex flex-col gap-1 p-3">
           <strong className="truncate text-sm text-[var(--gn-palette-3)]">{tour.title || "Sin título"}</strong>
           <span className="flex items-center justify-between gap-2 text-xs text-[var(--gn-palette-5)]">
-            <span className="truncate">{tour.departure_start ? new Date(`${tour.departure_start}T00:00:00Z`).toLocaleDateString("es-SV", { day: "numeric", month: "short", timeZone: "UTC" }) : "Sin fecha"}</span>
+            <span className="truncate">{next ? formatDeparture(next) : "Sin fecha"}{tour.departure_dates.length > 1 ? ` (+${tour.departure_dates.length - 1})` : ""}</span>
             <span className="shrink-0 font-bold text-[var(--gn-palette-1)]">{tour.currency_symbol} {tour.price}</span>
           </span>
         </span>

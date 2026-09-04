@@ -7,19 +7,27 @@ import { BookingDialog } from "./BookingDialog";
 interface TourBookingPanelProps {
   tourId: string;
   tourTitle: string;
-  departureStart: string;
+  departureDates: string[];
   duration: string;
   price: string;
+}
+
+function formatDate(iso: string) {
+  return new Date(`${iso}T00:00:00Z`).toLocaleDateString("es-SV", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" });
 }
 
 export function TourBookingPanel({
   tourId,
   tourTitle,
-  departureStart,
+  departureDates,
   duration,
   price,
 }: TourBookingPanelProps) {
-  const [requestedDate, setRequestedDate] = useState(departureStart);
+  // Only future (or today's) dates are bookable — a date that already
+  // passed stays visible elsewhere on the page but never in the picker.
+  const today = new Date().toISOString().slice(0, 10);
+  const availableDates = departureDates.filter((date) => date >= today);
+  const [requestedDate, setRequestedDate] = useState(availableDates[0] ?? "");
   const [people, setPeople] = useState(1);
   const [bookingOpen, setBookingOpen] = useState(false);
 
@@ -37,12 +45,15 @@ export function TourBookingPanel({
           Fecha de la salida
           <span className="relative">
             <CalendarDays className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[var(--gn-palette-1)]" />
-            <input
-              type="date"
+            <select
               value={requestedDate}
               onChange={(event) => setRequestedDate(event.target.value)}
-              className="h-12 w-full rounded-xl border border-[#d9ded9] bg-white pl-10 pr-3 text-sm font-normal text-[var(--gn-palette-3)]"
-            />
+              disabled={availableDates.length === 0}
+              className="h-12 w-full appearance-none rounded-xl border border-[#d9ded9] bg-white pl-10 pr-3 text-sm font-normal text-[var(--gn-palette-3)] disabled:opacity-60"
+            >
+              {availableDates.length === 0 ? <option value="">Sin fechas disponibles</option> : null}
+              {availableDates.map((date) => <option key={date} value={date}>{formatDate(date)}</option>)}
+            </select>
           </span>
         </label>
 
@@ -88,6 +99,7 @@ export function TourBookingPanel({
           onClose={() => setBookingOpen(false)}
           tourId={tourId}
           tourTitle={tourTitle}
+          availableDates={availableDates}
           initialDate={requestedDate}
           initialPeople={people}
         />

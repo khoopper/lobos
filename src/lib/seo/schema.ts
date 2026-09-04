@@ -48,11 +48,18 @@ export function buildBreadcrumbJsonLd(items: { name: string; url: string }[]) {
 interface TourEventInput {
   title: string;
   slug: string;
-  departureStart: string;
-  departureEnd: string | null;
+  /** All configured departure dates — the soonest upcoming one becomes the
+   * Event's startDate; a page only ever represents one Event, so the rest
+   * are just noted in the description. */
+  departureDates: string[];
   description: string;
   imageUrl?: string;
   price: string;
+}
+
+function nextDepartureDate(dates: string[]): string {
+  const today = new Date().toISOString().slice(0, 10);
+  return dates.find((date) => date >= today) ?? dates[dates.length - 1] ?? today;
 }
 
 /** Free-text prices ("Consultar") don't map to a valid Offer — only emit
@@ -72,8 +79,7 @@ export function buildTourEventJsonLd(tour: TourEventInput) {
     "@context": "https://schema.org",
     "@type": "Event",
     name: tour.title,
-    startDate: tour.departureStart,
-    endDate: tour.departureEnd ?? tour.departureStart,
+    startDate: nextDepartureDate(tour.departureDates),
     eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
     eventStatus: "https://schema.org/EventScheduled",
     description: tour.description,

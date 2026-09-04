@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { CalendarX2 } from "lucide-react";
 import { deleteBooking, updateBookingStatus } from "./actions";
 import type { BookingStatus, ProfileRole } from "@/lib/supabase/types";
 
@@ -46,8 +47,8 @@ function Row({ booking, canEdit, onChanged }: { booking: BookingRow; canEdit: bo
   }
 
   return (
-    <tr className="border-b border-gray-100 last:border-0">
-      <td className="px-4 py-3 font-medium text-[var(--gn-palette-3)]">{booking.customer_name}</td>
+    <tr className="border-b border-black/5 transition-colors last:border-0 hover:bg-[var(--gn-palette-8)]">
+      <td className="px-4 py-3 font-semibold text-[var(--gn-palette-3)]">{booking.customer_name}</td>
       <td className="px-4 py-3 text-[var(--gn-palette-5)]">
         {booking.email}
         <br />
@@ -57,40 +58,42 @@ function Row({ booking, canEdit, onChanged }: { booking: BookingRow; canEdit: bo
       <td className="px-4 py-3 text-[var(--gn-palette-5)]">{booking.requested_date}</td>
       <td className="px-4 py-3 text-[var(--gn-palette-5)]">{booking.num_people}</td>
       <td className="px-4 py-3">
-        <span className={`rounded-full px-2 py-1 text-xs font-medium ${STATUS_COLOR[booking.status]}`}>
+        <span className={`rounded-full px-2.5 py-1 text-xs font-bold ${STATUS_COLOR[booking.status]}`}>
           {STATUS_LABEL[booking.status]}
         </span>
       </td>
       {canEdit ? (
-        <td className="flex gap-2 px-4 py-3">
-          {booking.status !== "confirmed" ? (
+        <td className="px-4 py-3">
+          <div className="flex flex-wrap gap-1.5">
+            {booking.status !== "confirmed" ? (
+              <button
+                type="button"
+                disabled={pending}
+                onClick={() => setStatus("confirmed")}
+                className="rounded-lg border border-emerald-200 px-2 py-1 text-xs font-semibold text-emerald-700 transition-colors hover:bg-emerald-50 disabled:opacity-50"
+              >
+                Confirmar
+              </button>
+            ) : null}
+            {booking.status !== "cancelled" ? (
+              <button
+                type="button"
+                disabled={pending}
+                onClick={() => setStatus("cancelled")}
+                className="rounded-lg border border-red-200 px-2 py-1 text-xs font-semibold text-red-600 transition-colors hover:bg-red-50 disabled:opacity-50"
+              >
+                Cancelar
+              </button>
+            ) : null}
             <button
               type="button"
               disabled={pending}
-              onClick={() => setStatus("confirmed")}
-              className="rounded border border-green-600 px-2 py-1 text-xs text-green-700 disabled:opacity-50"
+              onClick={remove}
+              className="rounded-lg border border-[#d9ded9] px-2 py-1 text-xs font-semibold text-[var(--gn-palette-5)] transition-colors hover:bg-[var(--gn-palette-8)] disabled:opacity-50"
             >
-              Confirmar
+              Eliminar
             </button>
-          ) : null}
-          {booking.status !== "cancelled" ? (
-            <button
-              type="button"
-              disabled={pending}
-              onClick={() => setStatus("cancelled")}
-              className="rounded border border-red-400 px-2 py-1 text-xs text-red-600 disabled:opacity-50"
-            >
-              Cancelar
-            </button>
-          ) : null}
-          <button
-            type="button"
-            disabled={pending}
-            onClick={remove}
-            className="rounded border border-gray-300 px-2 py-1 text-xs text-gray-500 disabled:opacity-50"
-          >
-            Eliminar
-          </button>
+          </div>
         </td>
       ) : null}
     </tr>
@@ -101,10 +104,22 @@ export function BookingsTable({ bookings: initial, role }: { bookings: BookingRo
   const [bookings, setBookings] = useState(initial);
   const canEdit = role === "admin";
 
+  if (bookings.length === 0) {
+    return (
+      <div className="admin-card flex flex-col items-center gap-3 px-6 py-16 text-center">
+        <span className="flex h-12 w-12 items-center justify-center rounded-full bg-[var(--gn-palette-8)] text-[var(--gn-palette-1)]"><CalendarX2 className="h-6 w-6" /></span>
+        <div>
+          <p className="font-bold text-[var(--gn-palette-3)]">Aún no hay reservas</p>
+          <p className="mt-1 max-w-sm text-sm leading-6 text-[var(--gn-palette-5)]">Cuando alguien reserve una salida desde el sitio público, aparecerá aquí para confirmarla o rechazarla.</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="admin-card overflow-x-auto">
       <table className="w-full text-left text-sm">
-        <thead className="border-b border-gray-200 text-[var(--gn-palette-5)]">
+        <thead className="border-b border-black/5 text-xs font-bold uppercase tracking-wide text-[var(--gn-palette-5)]">
           <tr>
             <th className="px-4 py-3">Cliente</th>
             <th className="px-4 py-3">Contacto</th>
@@ -116,24 +131,16 @@ export function BookingsTable({ bookings: initial, role }: { bookings: BookingRo
           </tr>
         </thead>
         <tbody>
-          {bookings.length ? (
-            bookings.map((b) => (
-              <Row
-                key={b.id}
-                booking={b}
-                canEdit={canEdit}
-                onChanged={(next) =>
-                  setBookings((prev) => (next ? prev.map((x) => (x.id === b.id ? next : x)) : prev.filter((x) => x.id !== b.id)))
-                }
-              />
-            ))
-          ) : (
-            <tr>
-              <td colSpan={canEdit ? 7 : 6} className="px-4 py-8 text-center text-[var(--gn-palette-5)]">
-                Aún no hay reservas.
-              </td>
-            </tr>
-          )}
+          {bookings.map((b) => (
+            <Row
+              key={b.id}
+              booking={b}
+              canEdit={canEdit}
+              onChanged={(next) =>
+                setBookings((prev) => (next ? prev.map((x) => (x.id === b.id ? next : x)) : prev.filter((x) => x.id !== b.id)))
+              }
+            />
+          ))}
         </tbody>
       </table>
     </div>

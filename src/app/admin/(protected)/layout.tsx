@@ -45,12 +45,8 @@ export default async function ProtectedAdminLayout({ children }: { children: Rea
       <aside className="z-40 border-b border-white/10 bg-[var(--gn-palette-2)] text-white lg:sticky lg:top-0 lg:flex lg:h-dvh lg:flex-col lg:border-b-0 lg:border-r lg:border-white/10">
         <div className="flex h-[76px] items-center gap-3 border-b border-white/10 px-5 lg:h-auto lg:px-6 lg:py-6">
           <Image src="/brand/lobos/logo-white-640.png" alt="" width={640} height={640} className="h-11 w-11 object-contain" />
-          <div className="min-w-0">
-            <p className="text-sm font-extrabold tracking-[.08em]">CLUB DE LOBOS</p>
-            <p className="text-[11px] text-white/55">Administración</p>
-          </div>
-          <Link href="/" target="_blank" className="ml-auto rounded-lg p-2 text-white/60 transition-colors hover:bg-white/10 hover:text-white" aria-label="Abrir sitio"><House className="h-4 w-4" /></Link>
-          <form action={logout} className="lg:hidden">
+          <p className="min-w-0 text-sm font-extrabold tracking-[.08em]">CLUB DE LOBOS</p>
+          <form action={logout} className="ml-auto lg:hidden">
             <button type="submit" className="rounded-lg p-2 text-white/60 transition-colors hover:bg-white/10 hover:text-white" aria-label="Cerrar sesión"><LogOut className="h-4 w-4" /></button>
           </form>
         </div>

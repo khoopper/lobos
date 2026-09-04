@@ -8,6 +8,7 @@ import {
   UsersRound, Waves, X,
 } from "lucide-react";
 import { ImageUploader } from "@/components/admin/ImageUploader";
+import { Modal } from "@/components/admin/Modal";
 import {
   getDefaultTourDetail,
   TOUR_ICON_OPTIONS,
@@ -47,7 +48,7 @@ const ICONS: Record<TourIconId, typeof Activity> = {
 };
 
 function slugify(text: string) {
-  return text.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+  return text.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 }
 
 function Field({ label, children, className = "" }: { label: string; children: React.ReactNode; className?: string }) {
@@ -76,7 +77,7 @@ function DeleteTourDialog({
   }, [onCancel, pending]);
 
   return (
-    <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="delete-tour-title">
+    <div className="fixed inset-0 z-[1100] flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="delete-tour-title">
       <button type="button" aria-label="Cerrar confirmación" disabled={pending} onClick={onCancel} className="absolute inset-0 h-full w-full cursor-default bg-black/55 backdrop-blur-[2px]" />
       <div className="relative w-full max-w-md rounded-2xl border border-black/10 bg-white p-6 shadow-2xl">
         <div className="flex items-start gap-4">
@@ -183,37 +184,39 @@ function TourEditor({ tour, onDeleted, onSaved }: { tour: TourRow | null; onDele
   }
 
   return (
-    <div className="grid gap-5 p-5 lg:grid-cols-[250px_minmax(0,1fr)]">
-      <div className="grid grid-cols-2 gap-3 lg:grid-cols-1">
-        {form.images.map((image, index) => (
-          <div key={index} className="relative">
-            <ImageUploader
-              bucket="media"
-              label={index === 0 ? "Imagen principal" : `Imagen ${index + 1}`}
-              value={image.url ? image : null}
-              onChange={(next) => setImage(index, next)}
-              previewClassName="aspect-[4/5] w-full rounded-xl object-cover"
-            />
-            {form.images.length > 1 ? (
-              <button type="button" onClick={() => removeImage(index)} aria-label="Quitar imagen" className="absolute right-1.5 top-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-black/60 text-white hover:bg-black/80">
-                <X className="h-3.5 w-3.5" />
-              </button>
-            ) : null}
-          </div>
-        ))}
-        {form.images.length < MAX_IMAGES ? (
-          <button
-            type="button"
-            onClick={addImageSlot}
-            className="flex aspect-[4/5] w-full flex-col items-center justify-center gap-1 rounded-xl border border-dashed border-[#cfd6d0] bg-[#f8f9f7] text-xs font-semibold text-[var(--gn-palette-5)] hover:border-[var(--gn-palette-1)] hover:text-[var(--gn-palette-1)]"
-          >
-            <Plus className="h-5 w-5" />
-            Agregar imagen
-          </button>
-        ) : null}
+    <div className="flex flex-col gap-5">
+      <div>
+        <p className="mb-2 text-xs font-bold text-[var(--gn-palette-3)]">Fotos (máximo 5)</p>
+        <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
+          {form.images.map((image, index) => (
+            <div key={index} className="relative">
+              <ImageUploader
+                bucket="media"
+                value={image.url ? image : null}
+                onChange={(next) => setImage(index, next)}
+                previewClassName="aspect-square w-full rounded-lg object-cover"
+              />
+              {form.images.length > 1 ? (
+                <button type="button" onClick={() => removeImage(index)} aria-label="Quitar imagen" className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-black/60 text-white hover:bg-black/80">
+                  <X className="h-3 w-3" />
+                </button>
+              ) : null}
+            </div>
+          ))}
+          {form.images.length < MAX_IMAGES ? (
+            <button
+              type="button"
+              onClick={addImageSlot}
+              className="flex aspect-square w-full flex-col items-center justify-center gap-1 rounded-lg border border-dashed border-[#cfd6d0] bg-[#f8f9f7] text-[11px] font-semibold text-[var(--gn-palette-5)] hover:border-[var(--gn-palette-1)] hover:text-[var(--gn-palette-1)]"
+            >
+              <Plus className="h-4 w-4" />
+              Agregar
+            </button>
+          ) : null}
+        </div>
       </div>
 
-      <div className="grid min-w-0 content-start gap-4 sm:grid-cols-2">
+      <div className="grid min-w-0 gap-4 sm:grid-cols-2">
         <Field label="Nombre de la aventura" className="sm:col-span-2"><input className={inputCls} value={form.title} onChange={(e) => setForm((current) => ({ ...current, title: e.target.value }))} /></Field>
         <Field label="Identificador"><input className={inputCls} value={form.slug} placeholder={slugify(form.title) || "volcan-santa-ana"} onChange={(e) => setForm((current) => ({ ...current, slug: e.target.value }))} /></Field>
         <div className="grid grid-cols-[72px_1fr] gap-2">
@@ -225,7 +228,7 @@ function TourEditor({ tour, onDeleted, onSaved }: { tour: TourRow | null; onDele
         <Field label="Texto del botón"><input className={inputCls} value={form.button_label} onChange={(e) => setForm((current) => ({ ...current, button_label: e.target.value }))} /></Field>
         <div className="flex items-end"><label className="flex h-10 items-center gap-2 text-xs font-semibold text-[var(--gn-palette-3)]"><input type="checkbox" checked={form.is_published} onChange={(e) => setForm((current) => ({ ...current, is_published: e.target.checked }))} />Publicado</label></div>
 
-        <details className="rounded-xl border border-[#e2e6e2] bg-[#fafbfa] sm:col-span-2" open={!tour}>
+        <details className="rounded-xl border border-[#e2e6e2] bg-[#fafbfa] sm:col-span-2">
           <summary className="cursor-pointer px-4 py-3 text-sm font-extrabold text-[var(--gn-palette-3)]">Información completa e íconos de la salida</summary>
           <div className="grid gap-4 border-t border-[#e2e6e2] p-4">
             <Field label="Introducción">
@@ -260,12 +263,12 @@ function TourEditor({ tour, onDeleted, onSaved }: { tour: TourRow | null; onDele
             </div>
           </div>
         </details>
+      </div>
 
-        <div className="flex flex-wrap items-center justify-end gap-2 sm:col-span-2">
-          <button type="button" onClick={save} disabled={pending} className="gn-button disabled:opacity-50">{pending ? "Guardando…" : tour ? "Guardar" : "Agregar salida"}</button>
-          {tour ? <button type="button" onClick={() => { setDeleteError(null); setDeleteOpen(true); }} disabled={pending || deletePending} aria-label={`Eliminar ${tour.title}`} className="flex h-10 w-10 items-center justify-center rounded-lg border border-red-200 text-red-600 transition-colors hover:bg-red-50 disabled:opacity-50"><Trash2 className="h-4 w-4" /></button> : null}
-        </div>
-        {message ? <p className={`text-xs font-semibold sm:col-span-2 ${message.includes("publicados") ? "text-emerald-700" : "text-red-600"}`}>{message}</p> : null}
+      {message ? <p className={`text-xs font-semibold ${message.includes("publicados") ? "text-emerald-700" : "text-red-600"}`}>{message}</p> : null}
+      <div className="flex items-center justify-between gap-2 border-t border-black/5 pt-4">
+        {tour ? <button type="button" onClick={() => { setDeleteError(null); setDeleteOpen(true); }} disabled={pending || deletePending} className="inline-flex items-center gap-2 rounded-lg border border-red-200 px-3 py-2 text-xs font-bold text-red-600 disabled:opacity-50"><Trash2 className="h-4 w-4" />Eliminar</button> : <span />}
+        <button type="button" onClick={save} disabled={pending} className="gn-button disabled:opacity-50"><span className="inline-flex items-center">{pending ? "Guardando…" : tour ? "Guardar" : "Agregar salida"}</span></button>
       </div>
       {tour && deleteOpen ? (
         <DeleteTourDialog
@@ -280,36 +283,31 @@ function TourEditor({ tour, onDeleted, onSaved }: { tour: TourRow | null; onDele
   );
 }
 
-function TourCard({ tour, index, total, expanded, onToggle, onMove, onDeleted, onSaved }: {
-  tour: TourRow; index: number; total: number; expanded: boolean; onToggle: () => void;
-  onMove: (delta: number) => void; onDeleted: () => void; onSaved: (row: TourRow) => void;
+function TourCard({ tour, index, total, onEdit, onMove }: {
+  tour: TourRow; index: number; total: number; onEdit: () => void; onMove: (delta: number) => void;
 }) {
   return (
-    <div className={`admin-card overflow-hidden ${expanded ? "sm:col-span-2 xl:col-span-3" : ""}`}>
-      {expanded ? (
-        <TourEditor tour={tour} onDeleted={onDeleted} onSaved={onSaved} />
-      ) : (
-        <button type="button" onClick={onToggle} className="flex w-full flex-col text-left">
-          <span className="relative aspect-[4/3] w-full overflow-hidden bg-[var(--gn-palette-8)]">
-            {tour.images[0] ? <Image src={tour.images[0].url} alt="" width={tour.images[0].width} height={tour.images[0].height} className="h-full w-full object-cover" /> : null}
-            {tour.images.length > 1 ? <span className="absolute bottom-2 right-2 rounded-full bg-black/60 px-1.5 py-0.5 text-[10px] font-bold text-white">+{tour.images.length - 1}</span> : null}
-            {!tour.is_published ? <span className="absolute left-2 top-2 rounded-full bg-black/70 px-2 py-0.5 text-[10px] font-bold text-white">Oculta</span> : null}
+    <div className="admin-card overflow-hidden">
+      <button type="button" onClick={onEdit} className="flex w-full flex-col text-left">
+        <span className="relative aspect-[4/3] w-full overflow-hidden bg-[var(--gn-palette-8)]">
+          {tour.images[0] ? <Image src={tour.images[0].url} alt="" width={tour.images[0].width} height={tour.images[0].height} className="h-full w-full object-cover" /> : null}
+          {tour.images.length > 1 ? <span className="absolute bottom-2 right-2 rounded-full bg-black/60 px-1.5 py-0.5 text-[10px] font-bold text-white">+{tour.images.length - 1}</span> : null}
+          {!tour.is_published ? <span className="absolute left-2 top-2 rounded-full bg-black/70 px-2 py-0.5 text-[10px] font-bold text-white">Oculta</span> : null}
+        </span>
+        <span className="flex flex-col gap-1 p-3">
+          <strong className="truncate text-sm text-[var(--gn-palette-3)]">{tour.title || "Sin título"}</strong>
+          <span className="flex items-center justify-between gap-2 text-xs text-[var(--gn-palette-5)]">
+            <span className="truncate">{tour.departure_start ? new Date(`${tour.departure_start}T00:00:00Z`).toLocaleDateString("es-SV", { day: "numeric", month: "short", timeZone: "UTC" }) : "Sin fecha"}</span>
+            <span className="shrink-0 font-bold text-[var(--gn-palette-1)]">{tour.currency_symbol} {tour.price}</span>
           </span>
-          <span className="flex flex-col gap-1 p-3">
-            <strong className="truncate text-sm text-[var(--gn-palette-3)]">{tour.title || "Sin título"}</strong>
-            <span className="flex items-center justify-between gap-2 text-xs text-[var(--gn-palette-5)]">
-              <span className="truncate">{tour.departure_start ? new Date(`${tour.departure_start}T00:00:00Z`).toLocaleDateString("es-SV", { day: "numeric", month: "short", timeZone: "UTC" }) : "Sin fecha"}</span>
-              <span className="shrink-0 font-bold text-[var(--gn-palette-1)]">{tour.currency_symbol} {tour.price}</span>
-            </span>
-          </span>
-        </button>
-      )}
+        </span>
+      </button>
       <div className="flex items-center justify-between border-t border-black/5 px-3 py-2">
         <div className="flex gap-1">
           <button type="button" onClick={() => onMove(-1)} disabled={index === 0} aria-label="Subir" className="flex h-7 w-7 items-center justify-center rounded-lg text-[var(--gn-palette-5)] hover:bg-[var(--gn-palette-8)] disabled:opacity-30"><ChevronUp className="h-4 w-4" /></button>
           <button type="button" onClick={() => onMove(1)} disabled={index === total - 1} aria-label="Bajar" className="flex h-7 w-7 items-center justify-center rounded-lg text-[var(--gn-palette-5)] hover:bg-[var(--gn-palette-8)] disabled:opacity-30"><ChevronDown className="h-4 w-4" /></button>
         </div>
-        <button type="button" onClick={onToggle} className="text-xs font-bold text-[var(--gn-palette-1)]">{expanded ? "Cerrar" : "Editar"}</button>
+        <button type="button" onClick={onEdit} className="text-xs font-bold text-[var(--gn-palette-1)]">Editar</button>
       </div>
     </div>
   );
@@ -318,7 +316,7 @@ function TourCard({ tour, index, total, expanded, onToggle, onMove, onDeleted, o
 export function ToursManager({ tours: initial }: { tours: TourRow[] }) {
   const [tours, setTours] = useState(initial);
   const [creating, setCreating] = useState(false);
-  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [, startTransition] = useTransition();
 
   function move(index: number, delta: number) {
@@ -330,6 +328,8 @@ export function ToursManager({ tours: initial }: { tours: TourRow[] }) {
     startTransition(() => { void reorderTours(next.map((tour) => tour.id)); });
   }
 
+  const editingTour = tours.find((tour) => tour.id === editingId) ?? null;
+
   return (
     <div className="flex flex-col gap-5">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
@@ -339,24 +339,10 @@ export function ToursManager({ tours: initial }: { tours: TourRow[] }) {
             Tarjetas visibles en la portada. Desmarca &quot;Publicado&quot; para ocultar una salida sin eliminarla.
           </p>
         </div>
-        <button
-          type="button"
-          onClick={() => setCreating((current) => !current)}
-          aria-expanded={creating}
-          aria-controls="new-tour-form"
-          className="gn-button inline-flex shrink-0 items-center justify-center gap-2 font-bold"
-        >
-          <Plus className={`h-4 w-4 transition-transform ${creating ? "rotate-45" : ""}`} />
-          {creating ? "Cerrar formulario" : "Nueva salida"}
+        <button type="button" onClick={() => setCreating(true)} className="gn-button inline-flex shrink-0 font-bold">
+          <span className="inline-flex items-center gap-2"><Plus className="h-4 w-4" />Nueva salida</span>
         </button>
       </div>
-
-      {creating ? (
-        <section id="new-tour-form" className="admin-card">
-          <h2 className="border-b border-black/5 px-5 pt-4 text-base font-extrabold text-[var(--gn-palette-3)]">Crear una nueva salida</h2>
-          <TourEditor tour={null} />
-        </section>
-      ) : null}
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {tours.map((tour, index) => (
@@ -365,14 +351,27 @@ export function ToursManager({ tours: initial }: { tours: TourRow[] }) {
             tour={tour}
             index={index}
             total={tours.length}
-            expanded={expandedId === tour.id}
-            onToggle={() => setExpandedId((current) => (current === tour.id ? null : tour.id))}
+            onEdit={() => setEditingId(tour.id)}
             onMove={(delta) => move(index, delta)}
-            onDeleted={() => { setTours((current) => current.filter((item) => item.id !== tour.id)); setExpandedId(null); }}
-            onSaved={(row) => setTours((current) => current.map((item) => (item.id === row.id ? row : item)))}
           />
         ))}
       </div>
+
+      {creating ? (
+        <Modal title="Crear una nueva salida" onClose={() => setCreating(false)} maxWidthClassName="max-w-2xl">
+          <TourEditor tour={null} />
+        </Modal>
+      ) : null}
+
+      {editingTour ? (
+        <Modal title="Editar salida" onClose={() => setEditingId(null)} maxWidthClassName="max-w-2xl">
+          <TourEditor
+            tour={editingTour}
+            onDeleted={() => { setTours((current) => current.filter((item) => item.id !== editingTour.id)); setEditingId(null); }}
+            onSaved={(row) => setTours((current) => current.map((item) => (item.id === row.id ? row : item)))}
+          />
+        </Modal>
+      ) : null}
     </div>
   );
 }

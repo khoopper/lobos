@@ -143,12 +143,11 @@ export function BrandPackageUploader({ currentLogo, primary, accent, onApplied }
         <Image src={preview ?? currentLogo ?? "/brand/lobos/logo-white-640.png"} alt="Vista previa del logo" width={640} height={640} unoptimized={Boolean(preview)} className="h-full w-full object-contain" />
       </div>
       <div>
-        <div className="flex items-center gap-2"><PackageCheck className="h-5 w-5 text-[var(--gn-palette-1)]" /><h3 className="font-bold text-[var(--gn-palette-3)]">Carga única de marca</h3></div>
-        <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--gn-palette-5)]">Selecciona un PNG transparente. El sistema genera y publica automáticamente logos claro/oscuro, favicons, iconos móviles y la imagen para compartir en redes.</p>
+        <p className="text-xs leading-5 text-[var(--gn-palette-5)]">PNG transparente — genera logos claro/oscuro, favicons, iconos y la imagen para compartir.</p>
         <input ref={inputRef} type="file" accept="image/png" className="sr-only" onChange={(event) => { const selected = event.target.files?.[0] ?? null; setFile(selected); setStatus(null); }} />
-        <div className="mt-4 flex flex-wrap gap-2">
+        <div className="mt-3 flex flex-wrap items-center gap-2">
           <button type="button" onClick={() => inputRef.current?.click()} disabled={busy} className="inline-flex items-center gap-2 rounded-lg border border-[#d9ded9] bg-white px-4 py-2.5 text-sm font-semibold text-[var(--gn-palette-3)]"><ImageUp className="h-4 w-4" />Seleccionar PNG</button>
-          <button type="button" onClick={apply} disabled={!file || busy} className="gn-button disabled:cursor-not-allowed disabled:opacity-45">{busy ? "Procesando…" : "Generar y aplicar todo"}</button>
+          <button type="button" onClick={apply} disabled={!file || busy} className="gn-button disabled:cursor-not-allowed disabled:opacity-45"><span className="inline-flex items-center gap-2"><PackageCheck className="h-4 w-4" />{busy ? "Procesando…" : "Generar y aplicar todo"}</span></button>
         </div>
         {file ? <p className="mt-2 text-xs text-[var(--gn-palette-5)]">{file.name} · {(file.size / 1024).toFixed(0)} KB</p> : null}
         {status ? <p className="mt-2 text-xs font-medium text-[var(--gn-palette-1)]" role="status">{status}</p> : null}

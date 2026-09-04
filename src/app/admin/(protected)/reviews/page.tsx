@@ -9,15 +9,5 @@ export default async function ReviewsPage() {
     .order("sort_order"));
   const [, { data }] = await Promise.all([requireRole(["admin"]), reviewsPromise]);
 
-  return (
-    <div>
-      <h1 className="text-3xl font-extrabold tracking-tight text-[var(--gn-palette-3)]">Testimonios</h1>
-      <p className="mt-1 text-sm text-[var(--gn-palette-5)]">
-        Publica únicamente testimonios reales y autorizados.
-      </p>
-      <div className="mt-6">
-        <ReviewsManager reviews={data ?? []} />
-      </div>
-    </div>
-  );
+  return <ReviewsManager reviews={data ?? []} />;
 }

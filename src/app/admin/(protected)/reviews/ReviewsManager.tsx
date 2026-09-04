@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { Plus, Star, Trash2 } from "lucide-react";
+import { Modal } from "@/components/admin/Modal";
 import { deleteReview, upsertReview } from "./actions";
 
 export interface ReviewRow {
@@ -21,13 +23,23 @@ const EMPTY: Omit<ReviewRow, "id"> = {
   is_published: true,
 };
 
+function Stars({ rating }: { rating: number }) {
+  return (
+    <span className="flex gap-0.5 text-[var(--gn-palette-7)]">
+      {Array.from({ length: 5 }, (_, i) => (
+        <Star key={i} className="h-3.5 w-3.5" fill={i < rating ? "currentColor" : "none"} strokeWidth={1.5} />
+      ))}
+    </span>
+  );
+}
+
 function ReviewEditor({
   review,
   onSaved,
   onDeleted,
 }: {
   review: ReviewRow | null;
-  onSaved: () => void;
+  onSaved: (row: ReviewRow) => void;
   onDeleted?: () => void;
 }) {
   const [form, setForm] = useState(review ?? EMPTY);
@@ -46,10 +58,8 @@ function ReviewEditor({
         isPublished: form.is_published,
       });
       if (result.error) setMessage(result.error);
-      else {
-        onSaved();
-        if (!review) setForm(EMPTY);
-      }
+      else if (!review) window.location.reload();
+      else onSaved({ ...form, id: review.id });
     });
   }
 
@@ -63,8 +73,8 @@ function ReviewEditor({
   }
 
   return (
-    <div className="admin-card flex flex-col gap-3 p-5 sm:p-6">
-      <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_180px_100px]">
+    <div className="flex flex-col gap-4">
+      <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_150px_90px]">
         <input
           className={inputCls}
           placeholder="Nombre del cliente"
@@ -83,19 +93,17 @@ function ReviewEditor({
           onChange={(e) => setForm((f) => ({ ...f, rating: Number(e.target.value) }))}
         >
           {[5, 4, 3, 2, 1].map((n) => (
-            <option key={n} value={n}>
-              {n} ★
-            </option>
+            <option key={n} value={n}>{n} ★</option>
           ))}
         </select>
       </div>
       <textarea
-        className={inputCls + " h-20"}
+        className="admin-input min-h-28 px-3 py-2"
         placeholder="Texto de la reseña"
         value={form.body_text}
         onChange={(e) => setForm((f) => ({ ...f, body_text: e.target.value }))}
       />
-      <label className="flex items-center gap-2 text-sm text-[var(--gn-palette-3)]">
+      <label className="flex items-center gap-2 text-xs font-semibold text-[var(--gn-palette-3)]">
         <input
           type="checkbox"
           checked={form.is_published}
@@ -103,44 +111,73 @@ function ReviewEditor({
         />
         Publicada
       </label>
-      {message ? <p className="text-sm text-red-600">{message}</p> : null}
-      <div className="flex gap-2">
+      {message ? <p className="text-xs font-semibold text-red-600">{message}</p> : null}
+      <div className="flex items-center justify-between gap-2 border-t border-black/5 pt-4">
+        {review ? <button type="button" onClick={remove} disabled={pending} className="inline-flex items-center gap-2 rounded-lg border border-red-200 px-3 py-2 text-xs font-bold text-red-600 disabled:opacity-50"><Trash2 className="h-4 w-4" />Eliminar</button> : <span />}
         <button type="button" onClick={save} disabled={pending} className="gn-button disabled:opacity-60">
-          {pending ? "Guardando…" : review ? "Guardar cambios" : "Agregar reseña"}
+          <span className="inline-flex items-center">{pending ? "Guardando…" : review ? "Guardar cambios" : "Agregar reseña"}</span>
         </button>
-        {review ? (
-          <button
-            type="button"
-            onClick={remove}
-            disabled={pending}
-            className="rounded-lg border border-red-300 px-4 py-2 text-sm text-red-600 disabled:opacity-60"
-          >
-            Eliminar
-          </button>
-        ) : null}
       </div>
     </div>
   );
 }
 
+function ReviewCard({ review, onEdit }: { review: ReviewRow; onEdit: () => void }) {
+  return (
+    <button type="button" onClick={onEdit} className="admin-card flex flex-col gap-2 p-4 text-left">
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0">
+          <strong className="block truncate text-sm text-[var(--gn-palette-3)]">{review.author || "Sin nombre"}</strong>
+          <span className="text-[11px] text-[var(--gn-palette-5)]">{review.review_date}</span>
+        </div>
+        {!review.is_published ? <span className="shrink-0 rounded-full bg-black/70 px-2 py-0.5 text-[10px] font-bold text-white">Oculta</span> : null}
+      </div>
+      <Stars rating={review.rating} />
+      <p className="line-clamp-3 text-xs leading-5 text-[var(--gn-palette-5)]">{review.body_text || "Sin texto."}</p>
+    </button>
+  );
+}
+
 export function ReviewsManager({ reviews: initial }: { reviews: ReviewRow[] }) {
   const [reviews, setReviews] = useState(initial);
+  const [creating, setCreating] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+
+  const editingReview = reviews.find((review) => review.id === editingId) ?? null;
 
   return (
-    <div className="mx-auto flex max-w-4xl flex-col gap-5">
-      {reviews.map((review) => (
-        <ReviewEditor
-          key={review.id}
-          review={review}
-          onSaved={() => {}}
-          onDeleted={() => setReviews((r) => r.filter((x) => x.id !== review.id))}
-        />
-      ))}
-
-      <div>
-        <h2 className="mb-3 text-lg font-bold text-[var(--gn-palette-3)]">Agregar nueva reseña</h2>
-        <ReviewEditor review={null} onSaved={() => window.location.reload()} />
+    <div className="flex flex-col gap-5">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0">
+          <h1 className="text-3xl font-extrabold tracking-tight text-[var(--gn-palette-3)]">Testimonios</h1>
+          <p className="mt-1 max-w-3xl text-sm leading-6 text-[var(--gn-palette-5)]">Publica únicamente testimonios reales y autorizados.</p>
+        </div>
+        <button type="button" onClick={() => setCreating(true)} className="gn-button inline-flex shrink-0 font-bold">
+          <span className="inline-flex items-center gap-2"><Plus className="h-4 w-4" />Nueva reseña</span>
+        </button>
       </div>
+
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        {reviews.map((review) => (
+          <ReviewCard key={review.id} review={review} onEdit={() => setEditingId(review.id)} />
+        ))}
+      </div>
+
+      {creating ? (
+        <Modal title="Nueva reseña" onClose={() => setCreating(false)}>
+          <ReviewEditor review={null} onSaved={() => {}} />
+        </Modal>
+      ) : null}
+
+      {editingReview ? (
+        <Modal title="Editar reseña" onClose={() => setEditingId(null)}>
+          <ReviewEditor
+            review={editingReview}
+            onSaved={(row) => { setReviews((current) => current.map((item) => (item.id === row.id ? row : item))); setEditingId(null); }}
+            onDeleted={() => { setReviews((current) => current.filter((item) => item.id !== editingReview.id)); setEditingId(null); }}
+          />
+        </Modal>
+      ) : null}
     </div>
   );
 }

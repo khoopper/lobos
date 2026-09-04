@@ -37,6 +37,7 @@ export function CookieNotice() {
 
   return (
     <aside
+      id="aviso-cookies"
       role="dialog"
       aria-label="Aviso de cookies"
       aria-live="polite"

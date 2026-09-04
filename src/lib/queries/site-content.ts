@@ -20,7 +20,7 @@ import type {
  * never required touching component JSX.
  */
 
-const SALIDAS_URL = "https://guianatours.com.co/categoria-salidas/nuestros-proximos-destinos/";
+const SALIDAS_URL = "/#proximas-aventuras";
 
 const MONTHS_ES = [
   "Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic",
@@ -67,28 +67,28 @@ export async function getSiteSettings(): Promise<SiteSettingsData> {
     logoHeaderUrl: data?.logo_header_url ?? "/brand/lobos/logo-white-640.png",
     logoFooterUrl: data?.logo_footer_url ?? "/brand/lobos/logo-white-1024.png",
     faviconUrl: data?.favicon_url ?? null,
-    phoneLabel: data?.phone_label ?? "+57 350 225 0680",
-    phoneHref: data?.phone_href ?? "tel:350 225 0680",
-    email: data?.email ?? "reservas@guianatours.com.co",
-    address: data?.address ?? null,
+    phoneLabel: data?.phone_label ?? "+503 7952-8033 / +503 7554-6785",
+    phoneHref: data?.phone_href ?? "tel:+50379528033",
+    email: data?.email ?? "",
+    address: data?.address ?? "El Salvador",
     socialLinks,
     palette: {
-      1: data?.palette_1 ?? "#235652",
-      2: data?.palette_2 ?? "#183f3c",
-      3: data?.palette_3 ?? "#373435",
-      5: data?.palette_5 ?? "#686c6a",
-      7: data?.palette_7 ?? "#f4f2be",
-      8: data?.palette_8 ?? "#fbfaec",
+      1: data?.palette_1 ?? "#16382c",
+      2: data?.palette_2 ?? "#07130f",
+      3: data?.palette_3 ?? "#14231c",
+      5: data?.palette_5 ?? "#596860",
+      7: data?.palette_7 ?? "#d7b56d",
+      8: data?.palette_8 ?? "#f7f3ea",
     },
     footerRegistro: data?.footer_registro ?? null,
-    footerCopyright: data?.footer_copyright ?? "© 2026",
-    footerCreditLabel: data?.footer_credit_label ?? "khoopper",
+    footerCopyright: data?.footer_copyright ?? "© 2026 Club de Lobos.",
+    footerCreditLabel: data?.footer_credit_label ?? "",
     footerCreditHref: data?.footer_credit_href ?? null,
   };
 }
 
 /** The one nav entry that represents this clone's own homepage. */
-const HOME_HREF = "https://guianatours.com.co/";
+const HOME_HREF = "/";
 
 export async function getNavLinks(): Promise<NavLink[]> {
   const supabase = createPublicClient();
@@ -224,7 +224,7 @@ export async function getReviews(): Promise<ReviewsData> {
   // The rating summary ("EXCELENTE", "A base de 2976 reseñas") has no admin
   // screen yet in this phase — see scripts/seed-supabase.ts — so it stays a
   // fixed constant here rather than a half-wired DB read.
-  return { reviews, summary: { rating: "EXCELENTE", countLabel: "A base de 2976 reseñas", stars: 5 } };
+  return { reviews, summary: { rating: "LA MANADA", countLabel: "Aventuras que dejan huella", stars: 5 } };
 }
 
 function relativeYearsAgo(isoDate: string): string {

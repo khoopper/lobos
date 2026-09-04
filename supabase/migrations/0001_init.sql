@@ -76,28 +76,39 @@ create table public.site_settings (
   logo_header_url text,
   logo_footer_url text,
   favicon_url text,
-  phone_label text not null default '+57 350 225 0680',
-  phone_href text not null default 'tel:350 225 0680',
-  email text not null default 'reservas@guianatours.com.co',
+  phone_label text not null default '+503 7952-8033 / +503 7554-6785',
+  phone_href text not null default 'tel:+50379528033',
+  email text not null default '',
   address text,
   social_facebook_url text,
   social_instagram_url text,
   social_youtube_url text,
-  palette_1 text not null default '#235652',
-  palette_2 text not null default '#183f3c',
-  palette_3 text not null default '#373435',
-  palette_5 text not null default '#686c6a',
-  palette_7 text not null default '#f4f2be',
-  palette_8 text not null default '#fbfaec',
+  palette_1 text not null default '#16382c',
+  palette_2 text not null default '#07130f',
+  palette_3 text not null default '#14231c',
+  palette_5 text not null default '#596860',
+  palette_7 text not null default '#d7b56d',
+  palette_8 text not null default '#f7f3ea',
   footer_registro text,
-  footer_copyright text not null default '© 2026',
-  footer_credit_label text not null default 'khoopper',
+  footer_copyright text not null default '© 2026 Club de Lobos.',
+  footer_credit_label text not null default '',
   footer_credit_href text,
   updated_at timestamptz not null default now()
 );
 
-insert into public.site_settings (id, logo_header_url, logo_footer_url)
-values (1, '/brand/lobos/logo-white-640.png', '/brand/lobos/logo-white-1024.png');
+insert into public.site_settings (
+  id, logo_header_url, logo_footer_url, favicon_url, address,
+  social_instagram_url, footer_registro
+)
+values (
+  1,
+  '/brand/lobos/logo-white-640.png',
+  '/brand/lobos/logo-white-1024.png',
+  '/brand/lobos/favicon-32.png',
+  'El Salvador',
+  'https://www.instagram.com/lobos_sv/',
+  'El Salvador · Senderismo, camping y viajes en manada'
+);
 
 alter table public.site_settings enable row level security;
 
@@ -212,9 +223,9 @@ create table public.content_blocks (
 );
 
 insert into public.content_blocks (key, data) values
-  ('guias', '{"heading":"Guías expertos locales","buttonLabel":"Mira las próximas salidas","buttonHref":"https://guianatours.com.co/categoria-salidas/nuestros-proximos-destinos/","images":[]}'::jsonb),
-  ('camping', '{"heading":"Camping","body":"","buttonLabel":"Mira los próximos destinos","buttonHref":"https://guianatours.com.co/categoria-salidas/nuestros-proximos-destinos/","image":null}'::jsonb),
-  ('fotografias', '{"heading":"Fotografías de la semana","body":""}'::jsonb);
+  ('guias', '{"heading":"Aventuras que nos conectan","buttonLabel":"Mira la próxima salida","buttonHref":"/#proximas-aventuras","images":[]}'::jsonb),
+  ('camping', '{"heading":"Somos Club de Lobos","body":"Somos un club de amigos que nos encanta la aventura: senderismo, viajes, camping y vivir cada experiencia al máximo.","buttonLabel":"Síguenos en Instagram","buttonHref":"https://www.instagram.com/lobos_sv/","image":null}'::jsonb),
+  ('fotografias', '{"heading":"Historias de la manada","body":"Momentos, rutas y paisajes compartidos por Club de Lobos."}'::jsonb);
 
 alter table public.content_blocks enable row level security;
 

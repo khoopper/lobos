@@ -13,7 +13,7 @@ const COLUMN_BASIS = ["33.332%", "32.892%", "33.439%"] as const;
 
 export function GuiasExpertos({ block }: { block: GuiasBlock }) {
   return (
-    <section className="relative px-5 pt-[60px] max-[767px]:pt-10">
+    <section id="nosotros" className="relative px-5 pt-[60px] max-[767px]:pt-10">
       <div className="mx-auto flex max-w-[1140px] flex-col min-[768px]:flex-row">
         {/* text column — vertically centred against the photos */}
         <div className="flex w-full min-[768px]:w-auto" style={{ flexBasis: COLUMN_BASIS[0] }}>

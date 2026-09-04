@@ -133,14 +133,14 @@
    Values lifted verbatim from the Kadence palette on the live site.
    ------------------------------------------------------------------ */
 :root {
-  --gn-palette-1: #235652; /* primary teal — buttons, badges, footer */
-  --gn-palette-2: #183f3c; /* dark teal    — button hover, copyright bar */
-  --gn-palette-3: #373435; /* headings */
-  --gn-palette-4: #373435;
-  --gn-palette-5: #686c6a; /* body text */
-  --gn-palette-6: #686c6a;
-  --gn-palette-7: #f4f2be; /* pale yellow  — camping panel, active link */
-  --gn-palette-8: #fbfaec; /* cream        — page background */
+  --gn-palette-1: #16382c; /* emerald — buttons, badges, footer */
+  --gn-palette-2: #07130f; /* ink — button hover, copyright bar */
+  --gn-palette-3: #14231c; /* headings */
+  --gn-palette-4: #14231c;
+  --gn-palette-5: #596860; /* body text */
+  --gn-palette-6: #596860;
+  --gn-palette-7: #d7b56d; /* gold — camping panel, active link */
+  --gn-palette-8: #f7f3ea; /* ivory — page background */
   --gn-palette-9: #ffffff;
 
   --gn-btn-bg: var(--gn-palette-1);

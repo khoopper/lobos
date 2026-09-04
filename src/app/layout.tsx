@@ -9,29 +9,30 @@ const montserrat = Montserrat({
   display: "swap",
 });
 
-const ASSETS = "/sites/guianatours-com-co-e923d4eb/root-8a5edab2";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://lobos-chi.vercel.app";
+const BRAND = "/brand/lobos";
+const TITLE = "Club de Lobos | Aventuras desde El Salvador";
+const DESCRIPTION = "Senderismo, camping, volcanes y viajes para vivir nuevas aventuras con la manada.";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://guianatours.com.co/"),
-  title: "Guía Natours - Experiencia Inolvidables - Explora la Naturaleza",
-  description:
-    "Uno de nuestros destinos favoritos el el Parque Nacional Natural Chingaza, un lugar cargado de bosques, lagunas , páramo, venados y mucho más",
+  metadataBase: new URL(SITE_URL),
+  title: TITLE,
+  description: DESCRIPTION,
   icons: {
     icon: [
-      { url: `${ASSETS}/brand/favicon-32.png`, sizes: "32x32" },
-      { url: `${ASSETS}/brand/favicon-192.png`, sizes: "192x192" },
+      { url: `${BRAND}/favicon-32.png`, sizes: "32x32", type: "image/png" },
+      { url: `${BRAND}/icon-192.png`, sizes: "192x192", type: "image/png" },
     ],
-    apple: [{ url: `${ASSETS}/brand/apple-touch-icon.png`, sizes: "180x180" }],
+    apple: [{ url: `${BRAND}/apple-touch-icon.png`, sizes: "180x180", type: "image/png" }],
   },
   openGraph: {
-    locale: "es_ES",
+    locale: "es_SV",
     type: "website",
-    title: "Guía Natours - Experiencia Inolvidables - Explora la Naturaleza",
-    description:
-      "Uno de nuestros destinos favoritos el el Parque Nacional Natural Chingaza, un lugar cargado de bosques, lagunas , páramo, venados y mucho más",
-    url: "https://guianatours.com.co/",
-    siteName: "Guía Natours",
-    images: [{ url: `${ASSETS}/seo/og-image.jpeg`, width: 1500, height: 1000, type: "image/jpeg" }],
+    title: TITLE,
+    description: DESCRIPTION,
+    url: SITE_URL,
+    siteName: "Club de Lobos",
+    images: [{ url: `${BRAND}/og-image.png`, width: 1200, height: 630, type: "image/png" }],
   },
 };
 
@@ -41,7 +42,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es" className={`${montserrat.variable} h-full antialiased`}>
+    <html lang="es-SV" className={`${montserrat.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
   );

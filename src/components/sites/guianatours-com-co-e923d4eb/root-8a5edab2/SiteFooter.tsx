@@ -208,12 +208,14 @@ export function SiteFooter({
                   <span className="pl-[5px] text-[14px] leading-[22.4px] font-normal text-white">{phoneLabel}</span>
                 </a>
               </li>
-              <li className="mx-2 flex items-center">
-                <a href={`mailto:${email}`} className="flex items-center text-white">
-                  <EnvelopeIcon className="h-[14px] w-[14px] shrink-0" />
-                  <span className="pl-[5px] text-[14px] leading-[22.4px] font-normal text-white">{email}</span>
-                </a>
-              </li>
+              {email ? (
+                <li className="mx-2 flex items-center">
+                  <a href={`mailto:${email}`} className="flex items-center text-white">
+                    <EnvelopeIcon className="h-[14px] w-[14px] shrink-0" />
+                    <span className="pl-[5px] text-[14px] leading-[22.4px] font-normal text-white">{email}</span>
+                  </a>
+                </li>
+              ) : null}
             </ul>
           </div>
           <div className="flex items-center p-[10px] min-[768px]:w-1/2">

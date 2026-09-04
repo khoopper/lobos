@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { BrandPackageUploader } from "@/components/admin/BrandPackageUploader";
 import type { SiteSettingsData } from "@/lib/queries/site-content";
 import { findSitePaletteId, SITE_PALETTES, type SitePaletteId } from "@/lib/site-palettes";
-import { applyPalettePreset, updateSiteSettings } from "./actions";
+import { updateSiteSettings } from "./actions";
 
 function Field({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
   return <label className="flex min-w-0 flex-col gap-1.5"><span className="text-xs font-bold text-[var(--gn-palette-3)]">{label}</span>{children}{hint ? <span className="text-[11px] leading-4 text-[var(--gn-palette-5)]">{hint}</span> : null}</label>;
@@ -35,9 +35,18 @@ function Section({ title, description, children, className = "" }: { title: stri
   return <section className={`admin-card p-5 sm:p-6 ${className}`}><h2 className="text-base font-extrabold text-[var(--gn-palette-3)]">{title}</h2>{description ? <p className="mt-1 text-xs leading-5 text-[var(--gn-palette-5)]">{description}</p> : null}<div className="mt-5">{children}</div></section>;
 }
 
+function previewPalette(colors: Record<1 | 2 | 3 | 5 | 7 | 8, string>) {
+  const shell = document.getElementById("admin-shell");
+  if (!shell) return;
+  for (const key of [1, 2, 3, 5, 7, 8] as const) {
+    shell.style.setProperty(`--gn-palette-${key}`, colors[key]);
+  }
+}
+
 export function SettingsForm({ initial }: { initial: SiteSettingsData }) {
   const [state, setState] = useState<FormState>(() => toFormState(initial));
   const [pending, startTransition] = useTransition();
+  const [palettePending, setPalettePending] = useState<SitePaletteId | null>(null);
   const [message, setMessage] = useState<{ type: "error" | "success"; text: string } | null>(null);
   function set<K extends keyof FormState>(key: K, value: FormState[K]) { setState((current) => ({ ...current, [key]: value })); }
 
@@ -50,8 +59,18 @@ export function SettingsForm({ initial }: { initial: SiteSettingsData }) {
     8: state.palette8,
   });
 
-  function selectPalette(id: SitePaletteId) {
+  async function selectPalette(id: SitePaletteId) {
+    if (activePalette === id || palettePending) return;
+
     const colors = SITE_PALETTES[id].colors;
+    const previous = {
+      palette1: state.palette1,
+      palette2: state.palette2,
+      palette3: state.palette3,
+      palette5: state.palette5,
+      palette7: state.palette7,
+      palette8: state.palette8,
+    };
     setState((current) => ({
       ...current,
       palette1: colors[1],
@@ -61,13 +80,36 @@ export function SettingsForm({ initial }: { initial: SiteSettingsData }) {
       palette7: colors[7],
       palette8: colors[8],
     }));
+    previewPalette(colors);
     setMessage(null);
-    startTransition(async () => {
-      const result = await applyPalettePreset(id);
-      setMessage(result.error
-        ? { type: "error", text: result.error }
-        : { type: "success", text: `Paleta “${SITE_PALETTES[id].name}” aplicada a todo el sitio.` });
-    });
+    setPalettePending(id);
+
+    try {
+      const response = await fetch("/api/admin/site-palette", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      });
+      const result = await response.json().catch(() => null) as { error?: string; success?: boolean } | null;
+      if (!response.ok || !result?.success) {
+        throw new Error(result?.error ?? "No se pudo aplicar la paleta.");
+      }
+      setMessage({ type: "success", text: `Paleta “${SITE_PALETTES[id].name}” aplicada a todo el sitio.` });
+    } catch (error) {
+      setState((current) => ({ ...current, ...previous }));
+      previewPalette({
+        1: previous.palette1,
+        2: previous.palette2,
+        3: previous.palette3,
+        5: previous.palette5,
+        7: previous.palette7,
+        8: previous.palette8,
+      });
+      setMessage({ type: "error", text: error instanceof Error ? error.message : "No se pudo aplicar la paleta." });
+    } finally {
+      setPalettePending(null);
+    }
   }
 
   function save() {
@@ -115,7 +157,7 @@ export function SettingsForm({ initial }: { initial: SiteSettingsData }) {
                 key={id}
                 type="button"
                 aria-pressed={selected}
-                disabled={pending}
+                disabled={pending || palettePending !== null}
                 onClick={() => selectPalette(id)}
                 className={`rounded-xl border p-3 text-left transition-colors disabled:opacity-60 ${selected ? "border-[var(--gn-palette-1)] bg-[var(--gn-palette-8)] ring-2 ring-[var(--gn-palette-1)]/10" : "border-[#e5e8e5] bg-white hover:border-[#bdc7c0]"}`}
               >
@@ -125,7 +167,7 @@ export function SettingsForm({ initial }: { initial: SiteSettingsData }) {
                     <span className="mt-1 block text-[11px] leading-4 text-[var(--gn-palette-5)]">{palette.description}</span>
                   </span>
                   <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${selected ? "bg-[var(--gn-palette-1)] text-white" : "bg-[#f2f4f2] text-[#68716b]"}`}>
-                    {selected ? "Activa" : "Seleccionar"}
+                    {palettePending === id ? "Aplicando…" : selected ? "Activa" : "Seleccionar"}
                   </span>
                 </span>
                 <span className="mt-3 flex overflow-hidden rounded-lg border border-black/5" aria-hidden="true">

@@ -1,7 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
+import { cookies } from "next/headers";
 import { BookOpen, CalendarDays, GalleryHorizontalEnd, House, Images, LayoutDashboard, LogOut, MessageSquareText, Settings, Users } from "lucide-react";
 import { requireRole } from "@/lib/auth/dal";
+import { SITE_PALETTES, type SitePaletteId } from "@/lib/site-palettes";
 import { logout } from "../login/actions";
 
 const ADMIN_NAV = [
@@ -19,11 +21,27 @@ const ADMIN_NAV = [
 const WORKER_NAV = [{ href: "/admin/bookings", label: "Reservas", icon: House }] as const;
 
 export default async function ProtectedAdminLayout({ children }: { children: React.ReactNode }) {
-  const session = await requireRole(["admin", "worker"]);
+  const [session, cookieStore] = await Promise.all([requireRole(["admin", "worker"]), cookies()]);
   const nav = session.role === "admin" ? ADMIN_NAV : WORKER_NAV;
+  const requestedPalette = cookieStore.get("lobos-site-palette")?.value;
+  const paletteId: SitePaletteId = requestedPalette && requestedPalette in SITE_PALETTES
+    ? requestedPalette as SitePaletteId
+    : "lobos";
+  const palette = SITE_PALETTES[paletteId].colors;
 
   return (
-    <div className="min-h-dvh bg-[var(--gn-palette-8)] lg:grid lg:grid-cols-[252px_minmax(0,1fr)]">
+    <div
+      id="admin-shell"
+      className="min-h-dvh bg-[var(--gn-palette-8)] lg:grid lg:grid-cols-[252px_minmax(0,1fr)]"
+      style={{
+        "--gn-palette-1": palette[1],
+        "--gn-palette-2": palette[2],
+        "--gn-palette-3": palette[3],
+        "--gn-palette-5": palette[5],
+        "--gn-palette-7": palette[7],
+        "--gn-palette-8": palette[8],
+      } as React.CSSProperties}
+    >
       <aside className="z-40 border-b border-white/10 bg-[var(--gn-palette-2)] text-white lg:sticky lg:top-0 lg:flex lg:h-dvh lg:flex-col lg:border-b-0 lg:border-r lg:border-white/10">
         <div className="flex h-[76px] items-center gap-3 border-b border-white/10 px-5 lg:h-auto lg:px-6 lg:py-6">
           <Image src="/brand/lobos/logo-white-640.png" alt="" width={640} height={640} className="h-11 w-11 object-contain" />

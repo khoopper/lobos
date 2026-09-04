@@ -3,8 +3,10 @@ import { createClient } from "@supabase/supabase-js";
 import type { Database } from "@/lib/supabase/types";
 
 /** Stateless anonymous client for public, cacheable site content. */
+let publicClient: ReturnType<typeof createClient<Database>> | undefined;
+
 export function createPublicClient() {
-  return createClient<Database>(
+  publicClient ??= createClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
@@ -15,4 +17,5 @@ export function createPublicClient() {
       },
     },
   );
+  return publicClient;
 }

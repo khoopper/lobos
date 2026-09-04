@@ -17,7 +17,7 @@ import {
   getTours,
 } from "@/lib/queries/site-content";
 
-export const revalidate = 3600;
+export const revalidate = 86400;
 
 /**
  * Clone of https://guianatours.com.co/ — now backed by Supabase instead of

@@ -1,8 +1,8 @@
 {
-  "name": "guia-natours",
+  "name": "club-de-lobos",
   "version": "1.0.0",
   "private": true,
-  "description": "Sitio web y panel de administración de Guía Natours",
+  "description": "Sitio web y panel de administración de Club de Lobos",
   "engines": {
     "node": ">=24"
   },

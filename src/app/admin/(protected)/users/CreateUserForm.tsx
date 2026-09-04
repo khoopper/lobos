@@ -17,18 +17,18 @@ export function CreateUserForm() {
   const [state, formAction] = useActionState<CreateUserState, FormData>(createStaffAccount, {});
 
   return (
-    <form action={formAction} className="flex max-w-md flex-col gap-3 rounded-xl bg-white p-6 shadow">
+    <form action={formAction} className="admin-card flex w-full max-w-md flex-col gap-3 p-5 sm:p-6">
       <div className="flex flex-col gap-1">
         <label htmlFor="fullName" className="text-sm font-medium text-[var(--gn-palette-3)]">
           Nombre completo
         </label>
-        <input id="fullName" name="fullName" required className="h-10 rounded-lg border border-[#69727d] px-3 text-[15px]" />
+        <input id="fullName" name="fullName" required className="admin-input h-10 px-3" />
       </div>
       <div className="flex flex-col gap-1">
         <label htmlFor="email" className="text-sm font-medium text-[var(--gn-palette-3)]">
           Correo
         </label>
-        <input id="email" name="email" type="email" required className="h-10 rounded-lg border border-[#69727d] px-3 text-[15px]" />
+        <input id="email" name="email" type="email" required className="admin-input h-10 px-3" />
       </div>
       <div className="flex flex-col gap-1">
         <label htmlFor="password" className="text-sm font-medium text-[var(--gn-palette-3)]">
@@ -40,14 +40,14 @@ export function CreateUserForm() {
           type="password"
           required
           minLength={8}
-          className="h-10 rounded-lg border border-[#69727d] px-3 text-[15px]"
+          className="admin-input h-10 px-3"
         />
       </div>
       <div className="flex flex-col gap-1">
         <label htmlFor="role" className="text-sm font-medium text-[var(--gn-palette-3)]">
           Rol
         </label>
-        <select id="role" name="role" defaultValue="worker" className="h-10 rounded-lg border border-[#69727d] px-3 text-[15px]">
+        <select id="role" name="role" defaultValue="worker" className="admin-input h-10 px-3">
           <option value="worker">Trabajador (solo ve reservas)</option>
           <option value="admin">Administrador (acceso total)</option>
         </select>

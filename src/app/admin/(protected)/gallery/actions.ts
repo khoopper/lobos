@@ -4,10 +4,11 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireRole } from "@/lib/auth/dal";
 import { createClient } from "@/lib/supabase/server";
+import { assetUrlSchema } from "@/lib/validation";
 
 const ItemSchema = z.object({
   id: z.string().uuid().optional(),
-  imageUrl: z.string().url(),
+  imageUrl: assetUrlSchema,
   imageW: z.number().int().positive(),
   imageH: z.number().int().positive(),
   title: z.string(),

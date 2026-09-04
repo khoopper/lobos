@@ -31,7 +31,7 @@ export default async function BookingsPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-[var(--gn-palette-3)]">Reservas</h1>
+      <h1 className="text-3xl font-extrabold tracking-tight text-[var(--gn-palette-3)]">Reservas</h1>
       <p className="mt-1 text-sm text-[var(--gn-palette-5)]">
         {session.role === "worker"
           ? "Puedes ver las reservas y los datos de los clientes. Solo un administrador puede confirmarlas o cancelarlas."

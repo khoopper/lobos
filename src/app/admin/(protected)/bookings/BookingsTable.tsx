@@ -102,7 +102,7 @@ export function BookingsTable({ bookings: initial, role }: { bookings: BookingRo
   const canEdit = role === "admin";
 
   return (
-    <div className="overflow-x-auto rounded-xl bg-white shadow">
+    <div className="admin-card overflow-x-auto">
       <table className="w-full text-left text-sm">
         <thead className="border-b border-gray-200 text-[var(--gn-palette-5)]">
           <tr>

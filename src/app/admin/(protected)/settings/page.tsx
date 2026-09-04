@@ -8,9 +8,9 @@ export default async function SettingsPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-[var(--gn-palette-3)]">Ajustes del sitio</h1>
+      <h1 className="text-3xl font-extrabold tracking-tight text-[var(--gn-palette-3)]">Ajustes del sitio</h1>
       <p className="mt-1 text-sm text-[var(--gn-palette-5)]">
-        Logos, contacto, redes sociales, colores y textos del pie de página.
+        Marca, contacto, redes sociales, colores y textos generales.
       </p>
       <div className="mt-6">
         <SettingsForm initial={settings} />

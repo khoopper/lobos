@@ -1,8 +1,8 @@
 {
-  "name": "guia-natours",
+  "name": "club-de-lobos",
   "version": "1.0.0",
   "private": true,
-  "description": "Sitio web y panel de administración de Guía Natours",
+  "description": "Sitio web y panel de administración de Club de Lobos",
   "engines": {
     "node": ">=24"
   },
@@ -13,7 +13,8 @@
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
     "check": "npm run lint && npm run typecheck && npm run build",
-    "seed": "tsx scripts/seed-supabase.ts"
+    "seed": "node scripts/apply-lobos-content.mjs",
+    "brand:generate": "node scripts/generate-lobos-assets.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.3.0",

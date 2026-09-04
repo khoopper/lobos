@@ -87,7 +87,7 @@ export function ReviewsSection({ reviews, summary }: ReviewsSectionProps) {
   const safePage = page % pages;
 
   return (
-    <section className="mt-10 px-5">
+    <section id="testimonios" className="mt-10 scroll-mt-4 px-5">
       <div className="mx-auto max-w-[1140px]">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
           {/* rating header */}

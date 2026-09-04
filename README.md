@@ -1,59 +1,39 @@
-# Guía Natours
+# Club de Lobos
 
-Sitio web y panel de administración de Guía Natours, construido con Next.js, Tailwind CSS y Supabase.
+Sitio web y panel de administración de Club de Lobos, construido con Next.js, Tailwind CSS y Supabase.
 
 ## Stack
 
-- **Next.js 16** (App Router) + **React 19** + **TypeScript**
-- **Tailwind CSS v4** + **shadcn/ui**
-- **Supabase** — base de datos, autenticación y almacenamiento de imágenes
-- Despliegue en **Vercel**
+- Next.js 16 + React 19 + TypeScript
+- Tailwind CSS v4
+- Supabase: contenido, autenticación y almacenamiento
+- Vercel
 
 ## Desarrollo local
 
 ```bash
 npm install
-cp .env.example .env.local   # completa con tus credenciales de Supabase
+cp .env.example .env.local
 npm run dev
 ```
 
-Abre [http://localhost:3000](http://localhost:3000) para el sitio público y
-[http://localhost:3000/admin](http://localhost:3000/admin) para el panel de administración.
+Sitio: [http://localhost:3000](http://localhost:3000) · Administración: [http://localhost:3000/admin](http://localhost:3000/admin)
 
-## Base de datos
-
-El esquema completo (tablas, seguridad por fila, buckets de almacenamiento) está en
-[`supabase/migrations`](supabase/migrations). Aplícalo pegando cada archivo, en orden, en el
-**SQL Editor** de tu proyecto de Supabase.
-
-Para poblar la base de datos con el contenido inicial del sitio:
+## Contenido y marca
 
 ```bash
-npm run seed
+npm run brand:generate  # regenera tamaños desde public/brand/lobos/source/logo-master.png
+npm run seed            # aplica el contenido inicial de Club de Lobos a Supabase
 ```
 
-## Comandos
+El panel **Ajustes del sitio** también convierte un solo PNG transparente en logos, favicons, iconos móviles y tarjeta social, y publica el paquete completo.
 
-| Comando | Qué hace |
-| --- | --- |
-| `npm run dev` | Servidor de desarrollo |
-| `npm run build` | Build de producción |
-| `npm run check` | Lint + tipos + build |
-| `npm run seed` | Siembra la base de datos con el contenido inicial |
+## Verificación
 
-## Estructura
-
+```bash
+npm run lint
+npm run typecheck
+npm run build
 ```
-src/
-  app/                # Rutas (sitio público + panel /admin)
-  components/          # Componentes del sitio y del panel
-  lib/
-    supabase/          # Clientes de Supabase (servidor, navegador, tipos)
-    auth/               # Verificación de sesión y roles
-    queries/            # Lecturas de contenido para el sitio público
-    storage/            # Subida de imágenes
-supabase/
-  migrations/           # Esquema SQL y políticas de seguridad
-scripts/
-  seed-supabase.ts      # Siembra inicial de contenido
-```
+
+El esquema, las políticas RLS y los buckets están en `supabase/migrations`.

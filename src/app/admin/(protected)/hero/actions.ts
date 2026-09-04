@@ -4,16 +4,18 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireRole } from "@/lib/auth/dal";
 import { createClient } from "@/lib/supabase/server";
+import { assetUrlSchema, linkTargetSchema } from "@/lib/validation";
 
 const SlideSchema = z.object({
   id: z.string().uuid().optional(),
-  imageUrl: z.string().url(),
+  imageUrl: assetUrlSchema,
   imageW: z.number().int().positive(),
   imageH: z.number().int().positive(),
   heading: z.string().min(1),
   description: z.string().min(1),
   buttonLabel: z.string().min(1),
-  href: z.string().min(1),
+  href: linkTargetSchema,
+  isPublished: z.boolean(),
 });
 
 export interface ActionState {
@@ -36,11 +38,12 @@ export async function upsertHeroSlide(raw: z.infer<typeof SlideSchema>): Promise
     description: d.description,
     button_label: d.buttonLabel,
     href: d.href,
+    is_published: d.isPublished,
   };
 
   const { error } = d.id
     ? await supabase.from("hero_slides").update(row).eq("id", d.id)
-    : await supabase.from("hero_slides").insert({ ...row, sort_order: 9999, is_published: true });
+    : await supabase.from("hero_slides").insert({ ...row, sort_order: 9999 });
 
   if (error) return { error: error.message };
   revalidatePath("/");

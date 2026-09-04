@@ -1,38 +1,16 @@
+import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
-import type {
-  GalleryItem,
-  HeroSlide,
-  NavLink,
-  ProductCard,
-  Review,
-  SocialLink,
-} from "@/types/guianatours-com-co-e923d4eb";
+import type { GalleryItem, HeroSlide, NavLink, ProductCard, Review, SocialLink } from "@/types/guianatours-com-co-e923d4eb";
 
-/**
- * Public-site data layer. Every function here uses the anon-key server
- * client (`createClient()`), so Row Level Security — not application code —
- * decides what a visitor sees (e.g. `is_published = true` filtering on
- * hero_slides/tours/reviews/gallery_items happens inside Postgres).
- *
- * Each function maps DB rows onto the exact prop shapes the section
- * components already destructure (see
- * src/types/guianatours-com-co-e923d4eb.ts) so swapping the data source
- * never required touching component JSX.
- */
+const ADVENTURES_HREF = "/#proximas-aventuras";
+const MONTHS_ES = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"] as const;
 
-const SALIDAS_URL = "https://guianatours.com.co/categoria-salidas/nuestros-proximos-destinos/";
-
-const MONTHS_ES = [
-  "Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic",
-] as const;
-
-/** Renders "12 Sep 2026" or "19 Sep 2026 a 20 Sep 2026" — the exact style scraped from the source site. */
 function formatDeparture(start: string, end: string | null): string {
   const fmt = (iso: string) => {
     const [y, m, d] = iso.split("-").map(Number);
     return `${d} ${MONTHS_ES[m - 1]} ${y}`;
   };
-  return end ? `${fmt(start)} a ${fmt(end)}` : fmt(start);
+  return end ? `${fmt(start)} – ${fmt(end)}` : fmt(start);
 }
 
 export interface SiteSettingsData {
@@ -51,54 +29,42 @@ export interface SiteSettingsData {
   footerCreditHref: string | null;
 }
 
-export async function getSiteSettings(): Promise<SiteSettingsData> {
+export const getSiteSettings = cache(async (): Promise<SiteSettingsData> => {
   const supabase = await createClient();
   const { data } = await supabase.from("site_settings").select("*").eq("id", 1).single();
-
-  // Falls back to the original static values if the singleton row is ever
-  // missing (should not happen — the migration inserts it), so the public
-  // site never hard-crashes on a data problem.
   const socialLinks: SocialLink[] = [];
   if (data?.social_facebook_url) socialLinks.push({ label: "Facebook", href: data.social_facebook_url, network: "facebook" });
   if (data?.social_instagram_url) socialLinks.push({ label: "Instagram", href: data.social_instagram_url, network: "instagram" });
   if (data?.social_youtube_url) socialLinks.push({ label: "YouTube", href: data.social_youtube_url, network: "youtube" });
 
   return {
-    logoHeaderUrl: data?.logo_header_url ?? null,
-    logoFooterUrl: data?.logo_footer_url ?? null,
-    faviconUrl: data?.favicon_url ?? null,
-    phoneLabel: data?.phone_label ?? "+57 350 225 0680",
-    phoneHref: data?.phone_href ?? "tel:350 225 0680",
-    email: data?.email ?? "reservas@guianatours.com.co",
+    logoHeaderUrl: data?.logo_header_url ?? "/brand/lobos/logo-white-640.png",
+    logoFooterUrl: data?.logo_footer_url ?? "/brand/lobos/logo-white-1024.png",
+    faviconUrl: data?.favicon_url ?? "/brand/lobos/favicon-32.png",
+    phoneLabel: data?.phone_label ?? "+503 7952-8033 / +503 7554-6785",
+    phoneHref: data?.phone_href ?? "tel:+50379528033",
+    email: data?.email ?? "",
     address: data?.address ?? null,
     socialLinks,
     palette: {
-      1: data?.palette_1 ?? "#235652",
-      2: data?.palette_2 ?? "#183f3c",
-      3: data?.palette_3 ?? "#373435",
-      5: data?.palette_5 ?? "#686c6a",
-      7: data?.palette_7 ?? "#f4f2be",
-      8: data?.palette_8 ?? "#fbfaec",
+      1: data?.palette_1 ?? "#1b3a2d",
+      2: data?.palette_2 ?? "#0b0f0d",
+      3: data?.palette_3 ?? "#17201a",
+      5: data?.palette_5 ?? "#556057",
+      7: data?.palette_7 ?? "#e5b45f",
+      8: data?.palette_8 ?? "#f5f3eb",
     },
-    footerRegistro: data?.footer_registro ?? null,
-    footerCopyright: data?.footer_copyright ?? "© 2026",
-    footerCreditLabel: data?.footer_credit_label ?? "khoopper",
+    footerRegistro: data?.footer_registro ?? "El Salvador · Aventuras desde 2018",
+    footerCopyright: data?.footer_copyright ?? `© ${new Date().getFullYear()} Club de Lobos.`,
+    footerCreditLabel: data?.footer_credit_label ?? "",
     footerCreditHref: data?.footer_credit_href ?? null,
   };
-}
-
-/** The one nav entry that represents this clone's own homepage. */
-const HOME_HREF = "https://guianatours.com.co/";
+});
 
 export async function getNavLinks(): Promise<NavLink[]> {
   const supabase = await createClient();
-  const { data } = await supabase
-    .from("nav_links")
-    .select("id, label, href")
-    .eq("is_active", true)
-    .order("sort_order");
-
-  return (data ?? []).map((l) => ({ id: l.id, label: l.label, href: l.href, active: l.href === HOME_HREF }));
+  const { data } = await supabase.from("nav_links").select("id, label, href").eq("is_active", true).order("sort_order");
+  return (data ?? []).map((link) => ({ ...link, active: link.href === "/" }));
 }
 
 export async function getHeroSlides(): Promise<HeroSlide[]> {
@@ -107,14 +73,13 @@ export async function getHeroSlides(): Promise<HeroSlide[]> {
     .from("hero_slides")
     .select("id, image_url, heading, description, button_label, href")
     .order("sort_order");
-
-  return (data ?? []).map((s) => ({
-    id: s.id,
-    image: s.image_url,
-    heading: s.heading,
-    description: s.description,
-    buttonLabel: s.button_label,
-    href: s.href,
+  return (data ?? []).map((slide) => ({
+    id: slide.id,
+    image: slide.image_url,
+    heading: slide.heading,
+    description: slide.description,
+    buttonLabel: slide.button_label,
+    href: slide.href,
   }));
 }
 
@@ -122,21 +87,18 @@ export async function getTours(): Promise<ProductCard[]> {
   const supabase = await createClient();
   const { data } = await supabase
     .from("tours")
-    .select("id, slug, title, price, currency_symbol, departure_start, departure_end, image_url, hover_image_url, button_label")
+    .select("id, title, price, currency_symbol, departure_start, departure_end, image_url, hover_image_url, button_label")
     .order("sort_order");
-
-  return (data ?? []).map((t) => ({
-    id: t.id,
-    title: t.title,
-    price: t.price,
-    currencySymbol: t.currency_symbol,
-    nextDeparture: formatDeparture(t.departure_start, t.departure_end),
-    image: t.image_url,
-    // Booking is a dialog trigger from Phase 6 on, not a real per-tour page yet —
-    // temporary safe default so nothing links to a 404.
-    hoverImage: t.hover_image_url ?? t.image_url,
-    href: SALIDAS_URL,
-    buttonLabel: t.button_label,
+  return (data ?? []).map((tour) => ({
+    id: tour.id,
+    title: tour.title,
+    price: tour.price,
+    currencySymbol: tour.currency_symbol,
+    nextDeparture: formatDeparture(tour.departure_start, tour.departure_end),
+    image: tour.image_url,
+    hoverImage: tour.hover_image_url ?? tour.image_url,
+    href: ADVENTURES_HREF,
+    buttonLabel: tour.button_label,
   }));
 }
 
@@ -155,80 +117,58 @@ export interface CampingBlock {
   image: { src: string; width: number; height: number } | null;
 }
 
-export interface FotografiasBlock {
-  heading: string;
-  body: string;
-}
+export interface FotografiasBlock { heading: string; body: string }
 
-export async function getContentBlocks(): Promise<{
-  guias: GuiasBlock;
-  camping: CampingBlock;
-  fotografias: FotografiasBlock;
-}> {
+export async function getContentBlocks(): Promise<{ guias: GuiasBlock; camping: CampingBlock; fotografias: FotografiasBlock }> {
   const supabase = await createClient();
   const { data } = await supabase.from("content_blocks").select("key, data");
-
-  const byKey = Object.fromEntries((data ?? []).map((b) => [b.key, b.data]));
-
+  const byKey = Object.fromEntries((data ?? []).map((block) => [block.key, block.data]));
   return {
-    guias: (byKey.guias as unknown as GuiasBlock) ?? { heading: "", buttonLabel: "", buttonHref: SALIDAS_URL, images: [] },
-    camping: (byKey.camping as unknown as CampingBlock) ?? {
-      heading: "",
-      body: "",
-      buttonLabel: "",
-      buttonHref: SALIDAS_URL,
-      image: null,
-    },
+    guias: (byKey.guias as unknown as GuiasBlock) ?? { heading: "", buttonLabel: "", buttonHref: ADVENTURES_HREF, images: [] },
+    camping: (byKey.camping as unknown as CampingBlock) ?? { heading: "", body: "", buttonLabel: "", buttonHref: ADVENTURES_HREF, image: null },
     fotografias: (byKey.fotografias as unknown as FotografiasBlock) ?? { heading: "", body: "" },
   };
 }
 
 export async function getGalleryItems(): Promise<GalleryItem[]> {
   const supabase = await createClient();
-  const { data } = await supabase
-    .from("gallery_items")
-    .select("id, image_url, image_w, image_h, title")
-    .order("sort_order");
-
-  return (data ?? []).map((g) => ({
-    id: g.id,
-    thumb: g.image_url,
-    full: g.image_url,
-    title: g.title,
-    width: g.image_w,
-    height: g.image_h,
+  const { data } = await supabase.from("gallery_items").select("id, image_url, image_w, image_h, title").order("sort_order");
+  return (data ?? []).map((item) => ({
+    id: item.id,
+    thumb: item.image_url,
+    full: item.image_url,
+    title: item.title,
+    width: item.image_w,
+    height: item.image_h,
   }));
 }
 
-export interface ReviewsData {
-  reviews: Review[];
-  summary: { rating: string; countLabel: string; stars: number };
-}
+export interface ReviewsData { reviews: Review[]; summary: { rating: string; countLabel: string; stars: number } }
 
 export async function getReviews(): Promise<ReviewsData> {
   const supabase = await createClient();
-  const { data } = await supabase
-    .from("reviews")
-    .select("id, author, review_date, rating, body_text")
-    .order("sort_order");
-
-  const reviews: Review[] = (data ?? []).map((r) => ({
-    id: r.id,
-    author: r.author,
-    relativeDate: relativeYearsAgo(r.review_date),
-    isoDate: r.review_date,
-    rating: r.rating,
-    text: r.body_text,
+  const { data } = await supabase.from("reviews").select("id, author, review_date, rating, body_text").order("sort_order");
+  const reviews: Review[] = (data ?? []).map((review) => ({
+    id: review.id,
+    author: review.author,
+    relativeDate: relativeYearsAgo(review.review_date),
+    isoDate: review.review_date,
+    rating: review.rating,
+    text: review.body_text,
   }));
-
-  // The rating summary ("EXCELENTE", "A base de 2976 reseñas") has no admin
-  // screen yet in this phase — see scripts/seed-supabase.ts — so it stays a
-  // fixed constant here rather than a half-wired DB read.
-  return { reviews, summary: { rating: "EXCELENTE", countLabel: "A base de 2976 reseñas", stars: 5 } };
+  const average = reviews.length ? reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length : 0;
+  return {
+    reviews,
+    summary: {
+      rating: average ? average.toFixed(1) : "",
+      countLabel: `${reviews.length} ${reviews.length === 1 ? "testimonio" : "testimonios"}`,
+      stars: Math.round(average),
+    },
+  };
 }
 
 function relativeYearsAgo(isoDate: string): string {
   const years = Math.max(0, new Date().getFullYear() - new Date(isoDate).getFullYear());
-  if (years === 0) return "hace unos meses";
+  if (years === 0) return "recientemente";
   return years === 1 ? "hace 1 año" : `hace ${years} años`;
 }

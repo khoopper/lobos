@@ -33,7 +33,7 @@ export function LoginForm({ next }: { next?: string }) {
           type="email"
           required
           autoComplete="username"
-          className="h-10 rounded-lg border border-[#69727d] bg-white px-3 text-[15px] text-[#1f2124]"
+          className="admin-input h-10 px-3"
         />
       </div>
       <div className="flex flex-col gap-1">
@@ -46,7 +46,7 @@ export function LoginForm({ next }: { next?: string }) {
           type="password"
           required
           autoComplete="current-password"
-          className="h-10 rounded-lg border border-[#69727d] bg-white px-3 text-[15px] text-[#1f2124]"
+          className="admin-input h-10 px-3"
         />
       </div>
       {state.error ? <p className="text-sm text-red-600">{state.error}</p> : null}

@@ -16,23 +16,6 @@ import {
   getTours,
 } from "@/lib/queries/site-content";
 
-/**
- * Clone of https://guianatours.com.co/ — now backed by Supabase instead of
- * the static content.ts (which stays in the repo as a seed source / rollback
- * reference, see scripts/seed-supabase.ts).
- *
- * All eight independent reads run in one Promise.all so this never waterfalls.
- * Every read goes through the anon-key client (src/lib/supabase/server.ts),
- * so Row Level Security — not this file — decides what a visitor sees.
- *
- * Page-level layout notes (see docs/research/.../PAGE_TOPOLOGY.md):
- * - The header is an absolute, transparent overlay on the hero (z-index 100).
- *   It is NOT sticky on the original — it scrolls away with the page.
- * - Single native scroll container: no scroll-snap, no smooth-scroll library,
- *   no scroll-driven animation anywhere on the page.
- * - The Camping photo overlaps the section above it by 50px (handled inside
- *   CampingSection).
- */
 export default async function Home() {
   const [settings, navLinks, heroSlides, tours, blocks, gallery, reviewsData] = await Promise.all([
     getSiteSettings(),

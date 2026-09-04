@@ -12,9 +12,9 @@ export default async function GalleryPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-[var(--gn-palette-3)]">Galería</h1>
+      <h1 className="text-3xl font-extrabold tracking-tight text-[var(--gn-palette-3)]">Galería</h1>
       <p className="mt-1 text-sm text-[var(--gn-palette-5)]">
-        Las fotos de la sección &quot;Fotografías de la semana&quot;.
+        Fotografías de rutas, salidas y experiencias de la comunidad.
       </p>
       <div className="mt-6">
         <GalleryManager items={data ?? []} />

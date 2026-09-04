@@ -1,5 +1,4 @@
--- GuiaNatours CMS schema
--- Site: guianatours-com-co-e923d4eb / root-8a5edab2
+-- Club de Lobos CMS schema
 --
 -- Apply with `supabase db push` once the project is linked, or paste this
 -- whole file into the Supabase SQL Editor for a one-off bootstrap.
@@ -76,22 +75,22 @@ create table public.site_settings (
   logo_header_url text,
   logo_footer_url text,
   favicon_url text,
-  phone_label text not null default '+57 350 225 0680',
-  phone_href text not null default 'tel:350 225 0680',
-  email text not null default 'reservas@guianatours.com.co',
-  address text,
+  phone_label text not null default '+503 7952-8033 / +503 7554-6785',
+  phone_href text not null default 'tel:+50379528033',
+  email text not null default '',
+  address text default 'El Salvador',
   social_facebook_url text,
   social_instagram_url text,
   social_youtube_url text,
-  palette_1 text not null default '#235652',
-  palette_2 text not null default '#183f3c',
-  palette_3 text not null default '#373435',
-  palette_5 text not null default '#686c6a',
-  palette_7 text not null default '#f4f2be',
-  palette_8 text not null default '#fbfaec',
+  palette_1 text not null default '#1b3a2d',
+  palette_2 text not null default '#0b0f0d',
+  palette_3 text not null default '#17201a',
+  palette_5 text not null default '#556057',
+  palette_7 text not null default '#e5b45f',
+  palette_8 text not null default '#f5f3eb',
   footer_registro text,
-  footer_copyright text not null default '© 2026',
-  footer_credit_label text not null default 'khoopper',
+  footer_copyright text not null default '© 2026 Club de Lobos.',
+  footer_credit_label text not null default '',
   footer_credit_href text,
   updated_at timestamptz not null default now()
 );
@@ -211,9 +210,9 @@ create table public.content_blocks (
 );
 
 insert into public.content_blocks (key, data) values
-  ('guias', '{"heading":"Guías expertos locales","buttonLabel":"Mira las próximas salidas","buttonHref":"https://guianatours.com.co/categoria-salidas/nuestros-proximos-destinos/","images":[]}'::jsonb),
-  ('camping', '{"heading":"Camping","body":"","buttonLabel":"Mira los próximos destinos","buttonHref":"https://guianatours.com.co/categoria-salidas/nuestros-proximos-destinos/","image":null}'::jsonb),
-  ('fotografias', '{"heading":"Fotografías de la semana","body":""}'::jsonb);
+  ('guias', '{"heading":"Aventuras que nos conectan","buttonLabel":"Mira la próxima salida","buttonHref":"/#proximas-aventuras","images":[]}'::jsonb),
+  ('camping', '{"heading":"Somos Club de Lobos","body":"Somos un club de amigos que nos encanta la aventura.","buttonLabel":"Únete a la conversación","buttonHref":"https://www.instagram.com/lobos_sv/","image":null}'::jsonb),
+  ('fotografias', '{"heading":"Historias de la manada","body":"Momentos, rutas y paisajes compartidos por Club de Lobos."}'::jsonb);
 
 alter table public.content_blocks enable row level security;
 

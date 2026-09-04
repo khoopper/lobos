@@ -4,19 +4,20 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireRole } from "@/lib/auth/dal";
 import { createClient } from "@/lib/supabase/server";
+import { assetUrlSchema } from "@/lib/validation";
 
 const TourSchema = z.object({
   id: z.string().uuid().optional(),
   slug: z.string().min(1).regex(/^[a-z0-9-]+$/, "Solo minúsculas, números y guiones."),
   title: z.string().min(1),
   price: z.string().min(1),
-  currencySymbol: z.string().min(1),
+  currencySymbol: z.string().max(4),
   departureStart: z.string().min(1),
   departureEnd: z.string().nullable(),
-  imageUrl: z.string().url(),
+  imageUrl: assetUrlSchema,
   imageW: z.number().int().positive(),
   imageH: z.number().int().positive(),
-  hoverImageUrl: z.string().url().nullable(),
+  hoverImageUrl: assetUrlSchema.nullable(),
   hoverImageW: z.number().int().positive().nullable(),
   hoverImageH: z.number().int().positive().nullable(),
   buttonLabel: z.string().min(1),

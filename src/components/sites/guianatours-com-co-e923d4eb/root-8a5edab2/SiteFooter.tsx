@@ -1,71 +1,8 @@
-"use client";
-
 import Image from "next/image";
-import { cn } from "@/lib/utils";
-import {
-  EnvelopeIcon,
-  FacebookCircleIcon,
-  InstagramBrandIcon,
-  PhoneSolidIcon,
-  YoutubeBrandIcon,
-} from "@/components/sites/guianatours-com-co-e923d4eb/shared/icons";
+import { EnvelopeIcon, FacebookIcon, InstagramIcon, PhoneSolidIcon, YoutubeIcon } from "@/components/sites/guianatours-com-co-e923d4eb/shared/icons";
 import type { NavLink, SocialLink } from "@/types/guianatours-com-co-e923d4eb";
-import { ASSETS, FOOTER } from "./content";
 
-const SOCIAL_GLYPH = {
-  facebook: FacebookCircleIcon,
-  instagram: InstagramBrandIcon,
-  youtube: YoutubeBrandIcon,
-} as const;
-
-/** Column wrapper: 20px padding plus the 1px cream divider (last column has none). */
-function FooterColumn({
-  children,
-  divider = true,
-}: {
-  children: React.ReactNode;
-  divider?: boolean;
-}) {
-  return (
-    <div className="flex min-[768px]:w-1/4">
-      <div
-        className={cn(
-          "w-full p-5",
-          divider && "min-[768px]:border-r min-[768px]:border-[var(--gn-palette-8)]",
-        )}
-      >
-        {children}
-      </div>
-    </div>
-  );
-}
-
-/**
- * Elementor heading widget: h3 18px/18px bold white, widget margin-bottom 20px.
- * The "Mapa del sitio" heading additionally gains 20px of internal margin below
- * 768px (measured: its widget box is 18px at 1440 and 38px at 390); "Legal"
- * does not. `flex flex-col` keeps the h3's margin inside the widget box.
- */
-function FooterHeading({
-  children,
-  mobileGap = false,
-}: {
-  children: React.ReactNode;
-  mobileGap?: boolean;
-}) {
-  return (
-    <div className="mb-5 flex flex-col">
-      <h3
-        className={cn(
-          "text-center text-[18px] leading-[18px] font-bold text-white",
-          mobileGap && "max-[767px]:mb-5",
-        )}
-      >
-        {children}
-      </h3>
-    </div>
-  );
-}
+const SOCIAL_GLYPH = { facebook: FacebookIcon, instagram: InstagramIcon, youtube: YoutubeIcon } as const;
 
 export interface SiteFooterProps {
   navLinks: NavLink[];
@@ -80,180 +17,42 @@ export interface SiteFooterProps {
   creditHref: string | null;
 }
 
-export function SiteFooter({
-  navLinks,
-  socialLinks,
-  phoneLabel,
-  phoneHref,
-  email,
-  logoUrl,
-  registro,
-  copyright,
-  creditLabel,
-  creditHref,
-}: SiteFooterProps) {
+export function SiteFooter({ navLinks, socialLinks, phoneLabel, phoneHref, email, logoUrl, registro, copyright, creditLabel, creditHref }: SiteFooterProps) {
+  const instagram = socialLinks.find((social) => social.network === "instagram");
   return (
-    <footer>
-      {/* ---------- section 4da3f5a — four columns ---------- */}
-      <section className="relative bg-[var(--gn-palette-1)] px-5 pb-5 pt-10">
-        <div className="mx-auto flex max-w-[1140px] flex-col min-[768px]:flex-row">
-          <FooterColumn>
-            <Image
-              src={logoUrl ?? `${ASSETS}/brand/logo-blanco.png`}
-              alt=""
-              width={1080}
-              height={1080}
-              className="mx-auto mb-5 block h-auto w-[244px] max-[767px]:w-[310px]"
-              sizes="(max-width: 767px) 310px, 244px"
-            />
-            {registro ? (
-              <p className="m-0 text-center text-[14px] leading-[14px] font-normal text-white">{registro}</p>
-            ) : null}
-          </FooterColumn>
-
-          <FooterColumn>
-            <FooterHeading mobileGap>{FOOTER.sitemapHeading}</FooterHeading>
-            <nav aria-label="Mapa del sitio">
-              <ul className="flex flex-col">
-                {navLinks.map((link) => (
-                  <li key={link.id}>
-                    <a
-                      href={link.href}
-                      aria-current={link.active ? "page" : undefined}
-                      className={cn(
-                        "flex py-[2px] text-[14px] leading-5 font-normal transition-colors hover:text-[var(--gn-palette-7)]",
-                        link.active ? "text-[var(--gn-palette-7)]" : "text-white",
-                      )}
-                    >
-                      {link.label}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </nav>
-          </FooterColumn>
-
-          <FooterColumn>
-            <FooterHeading>{FOOTER.legalHeading}</FooterHeading>
-            <ul>
-              {FOOTER.legalLinks.map((link) => (
-                <li key={link.label} className="flex pb-[2px] text-center">
-                  <a
-                    href={link.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-full text-center text-[14px] leading-[22.4px] font-normal text-white transition-colors hover:text-[var(--gn-palette-7)]"
-                  >
-                    {link.label}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </FooterColumn>
-
-          <FooterColumn divider={false}>
-            <h3 className="mb-[10px] text-center text-[18px] leading-[18px] font-bold text-white">
-              {FOOTER.subscribeHeading}
-            </h3>
-            <form onSubmit={(e) => e.preventDefault()} name="Footer form">
-              <div className="mb-[10px] px-[5px]">
-                <label htmlFor="gn-footer-name" className="sr-only">
-                  Nombre
-                </label>
-                <input
-                  id="gn-footer-name"
-                  name="form_fields[name]"
-                  type="text"
-                  required
-                  placeholder={FOOTER.form.namePlaceholder}
-                  className="block h-10 w-full rounded-lg border border-[#69727d] bg-white px-[7.5px] py-[6px] text-[15px] leading-[21px] text-[#1f2124]"
-                />
-              </div>
-              <div className="mb-[10px] px-[5px]">
-                <label htmlFor="gn-footer-email" className="sr-only">
-                  Email
-                </label>
-                <input
-                  id="gn-footer-email"
-                  name="form_fields[email]"
-                  type="email"
-                  required
-                  placeholder={FOOTER.form.emailPlaceholder}
-                  className="block h-10 w-full rounded-lg border border-[#69727d] bg-white px-[7.5px] py-[6px] text-[15px] leading-[21px] text-[#1f2124]"
-                />
-              </div>
-              {/* no bottom margin on the last group — Elementor cancels it with a
-                  -10px margin on the fields wrapper, so it must not leak out */}
-              <div className="px-[5px]">
-                <button
-                  type="submit"
-                  className="block h-10 w-full rounded-lg bg-[var(--gn-palette-7)] px-6 text-center text-[15px] leading-[15px] font-normal text-[var(--gn-palette-1)] transition-all duration-300"
-                >
-                  {FOOTER.form.submitLabel}
-                </button>
-              </div>
-            </form>
-          </FooterColumn>
+    <footer className="mt-14 bg-[var(--gn-palette-1)] text-white" id="contacto">
+      <div className="mx-auto grid max-w-[1180px] gap-10 px-6 py-14 md:grid-cols-[1.2fr_.8fr_1fr]">
+        <div>
+          <Image src={logoUrl ?? "/brand/lobos/logo-white-1024.png"} alt="Club de Lobos" width={1024} height={1024} className="mb-5 h-32 w-32 object-contain" />
+          <p className="max-w-sm text-sm leading-6 text-white/80">Somos un club de amigos que disfruta la aventura, el senderismo, el camping y vivir cada ruta al máximo.</p>
+          {registro ? <p className="mt-3 text-xs font-semibold uppercase tracking-[.16em] text-[var(--gn-palette-7)]">{registro}</p> : null}
         </div>
-      </section>
 
-      {/* ---------- section 21cf77c — contact bar ---------- */}
-      <section className="relative bg-[var(--gn-palette-1)] px-5 pb-10 pt-5">
-        <div className="mx-auto flex max-w-[1140px] flex-col min-[768px]:flex-row">
-          <div className="flex items-center p-[10px] min-[768px]:w-1/2">
-            <ul className="-mx-2 flex flex-wrap max-[767px]:w-full max-[767px]:justify-center">
-              <li className="mx-2 flex items-center">
-                <a href={phoneHref} className="flex items-center text-white">
-                  <PhoneSolidIcon className="h-[14px] w-[14px] shrink-0" />
-                  <span className="pl-[5px] text-[14px] leading-[22.4px] font-normal text-white">{phoneLabel}</span>
-                </a>
-              </li>
-              <li className="mx-2 flex items-center">
-                <a href={`mailto:${email}`} className="flex items-center text-white">
-                  <EnvelopeIcon className="h-[14px] w-[14px] shrink-0" />
-                  <span className="pl-[5px] text-[14px] leading-[22.4px] font-normal text-white">{email}</span>
-                </a>
-              </li>
-            </ul>
+        <div>
+          <h2 className="mb-4 text-sm font-bold uppercase tracking-[.16em]">Explora</h2>
+          <nav aria-label="Mapa del sitio" className="flex flex-col gap-3">
+            {navLinks.map((link) => <a key={link.id} href={link.href} className="text-sm text-white/80 transition-colors hover:text-[var(--gn-palette-7)]">{link.label}</a>)}
+          </nav>
+        </div>
+
+        <div>
+          <h2 className="mb-4 text-sm font-bold uppercase tracking-[.16em]">Hablemos de tu próxima aventura</h2>
+          <div className="space-y-3">
+            <a href={phoneHref} className="flex items-start gap-3 text-sm text-white/85 hover:text-white"><PhoneSolidIcon className="mt-0.5 h-4 w-4 shrink-0 text-[var(--gn-palette-7)]" /><span>{phoneLabel}</span></a>
+            {email ? <a href={`mailto:${email}`} className="flex items-center gap-3 text-sm text-white/85 hover:text-white"><EnvelopeIcon className="h-4 w-4 text-[var(--gn-palette-7)]" />{email}</a> : null}
           </div>
-          <div className="flex items-center p-[10px] min-[768px]:w-1/2">
-            <div className="flex w-full justify-center gap-[5px] min-[768px]:justify-end">
-              {socialLinks.map((social) => {
-                const Glyph = SOCIAL_GLYPH[social.network];
-                return (
-                  <a
-                    key={social.network}
-                    href={social.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex h-7 w-7 items-center justify-center rounded-full bg-white text-[var(--gn-palette-1)]"
-                  >
-                    <span className="sr-only">{social.label}</span>
-                    <Glyph className="h-[14px] w-[14px]" />
-                  </a>
-                );
-              })}
-            </div>
+          {instagram ? <a href={instagram.href} target="_blank" rel="noopener noreferrer" className="mt-6 inline-flex rounded-lg bg-[var(--gn-palette-7)] px-5 py-3 text-sm font-bold text-[var(--gn-palette-2)] transition-transform hover:-translate-y-0.5">Escríbenos en Instagram</a> : null}
+          <div className="mt-5 flex gap-2">
+            {socialLinks.map((social) => { const Glyph = SOCIAL_GLYPH[social.network]; return <a key={social.network} href={social.href} target="_blank" rel="noopener noreferrer" aria-label={social.label} className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-[var(--gn-palette-1)]"><Glyph className="h-4 w-4" /></a>; })}
           </div>
         </div>
-      </section>
+      </div>
 
-      {/* ---------- section b4821ba — copyright ---------- */}
-      <section className="relative bg-[var(--gn-palette-2)]">
-        {/* the copy widget carries an 80px bottom margin below 768px */}
-        <div className="mx-auto max-w-[1140px] p-[10px]">
-          <p className="my-[17px] text-center text-[17px] leading-[27.2px] font-normal text-white max-[767px]:mb-20">
-            {copyright}
-            {creditHref ? (
-              <a href={creditHref} target="_blank" rel="noopener" className="font-bold text-white">
-                {creditLabel}
-              </a>
-            ) : (
-              <span className="font-bold text-white">{creditLabel}</span>
-            )}
-          </p>
-        </div>
-      </section>
+      <div className="bg-[var(--gn-palette-2)] px-6 py-5">
+        <p className="mx-auto max-w-[1180px] text-center text-xs text-white/70">
+          {copyright}{creditLabel ? <> {creditHref ? <a href={creditHref} target="_blank" rel="noopener noreferrer" className="font-semibold text-white">{creditLabel}</a> : <span className="font-semibold text-white">{creditLabel}</span>}</> : null}
+        </p>
+      </div>
     </footer>
   );
 }

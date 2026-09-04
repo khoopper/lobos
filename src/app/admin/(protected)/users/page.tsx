@@ -12,14 +12,14 @@ export default async function UsersPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-[var(--gn-palette-3)]">Usuarios</h1>
+      <h1 className="text-3xl font-extrabold tracking-tight text-[var(--gn-palette-3)]">Usuarios</h1>
       <p className="mt-1 text-sm text-[var(--gn-palette-5)]">
         Crea cuentas para tu equipo. Los administradores pueden editar todo el sitio; los
         trabajadores únicamente ven la lista de reservas.
       </p>
 
-      <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_auto]">
-        <div className="overflow-x-auto rounded-xl bg-white shadow">
+      <div className="mt-6 grid items-start gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(320px,420px)]">
+        <div className="admin-card overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead className="border-b border-gray-200 text-[var(--gn-palette-5)]">
               <tr>

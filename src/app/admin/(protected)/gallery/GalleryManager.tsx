@@ -14,7 +14,7 @@ export interface GalleryItemRow {
   is_published: boolean;
 }
 
-const inputCls = "h-9 w-full rounded-lg border border-[#69727d] bg-white px-2 text-[14px] text-[#1f2124]";
+const inputCls = "admin-input h-9 px-2";
 
 function ItemCard({ item, onChanged }: { item: GalleryItemRow; onChanged: (next: GalleryItemRow | null) => void }) {
   const [title, setTitle] = useState(item.title);
@@ -47,8 +47,8 @@ function ItemCard({ item, onChanged }: { item: GalleryItemRow; onChanged: (next:
   }
 
   return (
-    <div className="flex flex-col gap-2 rounded-xl bg-white p-3 shadow">
-      <Image src={item.image_url} alt="" width={item.image_w} height={item.image_h} className="h-28 w-full rounded-lg object-cover" />
+    <div className="admin-card flex flex-col gap-2 p-3">
+      <Image src={item.image_url} alt="" width={item.image_w} height={item.image_h} className="aspect-[4/5] w-full rounded-xl object-cover" />
       <input className={inputCls} value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Título" />
       <label className="flex items-center gap-2 text-xs text-[var(--gn-palette-3)]">
         <input type="checkbox" checked={published} onChange={(e) => setPublished(e.target.checked)} />
@@ -99,7 +99,7 @@ export function GalleryManager({ items: initial }: { items: GalleryItemRow[] }) 
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-4">
         {items.map((item) => (
           <ItemCard
             key={item.id}
@@ -109,7 +109,7 @@ export function GalleryManager({ items: initial }: { items: GalleryItemRow[] }) 
         ))}
       </div>
 
-      <div className="max-w-sm rounded-xl bg-white p-6 shadow">
+      <div className="admin-card max-w-sm p-5">
         <h2 className="mb-3 text-lg font-bold text-[var(--gn-palette-3)]">Agregar foto</h2>
         <ImageUploader bucket="media" onChange={addNew} />
         {pending ? <p className="mt-2 text-sm text-[var(--gn-palette-5)]">Agregando…</p> : null}

@@ -22,33 +22,33 @@ export function ProductCard({ product }: { product: ProductCardData }) {
   const [bookingOpen, setBookingOpen] = useState(false);
 
   return (
-    <li className="gn-product-card group relative flex flex-col overflow-hidden rounded-[4px] bg-white">
+    <li className="gn-product-card group relative flex flex-col overflow-hidden rounded-2xl bg-white">
       {/* .closest-booking-availability */}
-      <div className="absolute left-0 top-0 z-[1] rounded-br-[5px] bg-white px-[14.4px] py-[7.2px] text-[14.4px] leading-[23.04px] font-normal text-[var(--gn-palette-1)]">
+      <div className="absolute left-0 top-0 z-[1] rounded-br-xl bg-white/95 px-4 py-2 text-xs leading-5 font-normal text-[var(--gn-palette-1)] backdrop-blur">
         <span>
-          <b className="font-bold">Próxima salida:</b> {product.nextDeparture}
+          <b className="font-bold">Fecha:</b> {product.nextDeparture}
         </span>
       </div>
 
       {/* .woocommerce-loop-image-link */}
       <a
         href={product.href}
-        className="relative block aspect-[600/360] w-full overflow-hidden"
+        className="relative block aspect-[4/5] w-full overflow-hidden"
         aria-label={product.title}
       >
         <Image
           src={product.image}
           alt={product.title}
-          width={600}
-          height={360}
-          className="block h-full w-full object-cover transition-transform duration-100 ease-linear group-hover:scale-[1.07]"
+          width={512}
+          height={640}
+          className="block h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04]"
         />
         <Image
           src={product.hoverImage}
           alt=""
           aria-hidden="true"
-          width={600}
-          height={360}
+          width={512}
+          height={640}
           className="absolute inset-0 h-full min-h-full w-full object-cover opacity-0 transition-opacity duration-[400ms] group-hover:opacity-100"
         />
       </a>
@@ -59,8 +59,7 @@ export function ProductCard({ product }: { product: ProductCardData }) {
           <a href={product.href}>{product.title}</a>
         </h2>
         <span className="mb-[14.569px] block text-[14.569px] leading-[23.31px] font-normal text-[var(--gn-palette-5)]">
-          <span>{product.currencySymbol}</span>
-          &nbsp;{product.price}
+          {product.currencySymbol ? <><span>{product.currencySymbol}</span>&nbsp;</> : null}{product.price}
         </span>
 
         {/* .product-action-wrap */}

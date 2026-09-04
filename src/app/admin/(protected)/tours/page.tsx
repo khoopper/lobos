@@ -14,10 +14,9 @@ export default async function ToursPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-[var(--gn-palette-3)]">Próximas salidas</h1>
+      <h1 className="text-3xl font-extrabold tracking-tight text-[var(--gn-palette-3)]">Aventuras y salidas</h1>
       <p className="mt-1 text-sm text-[var(--gn-palette-5)]">
-        Las tarjetas de destinos que se muestran en la portada. Desmarca &quot;Publicado&quot; para
-        ocultar una salida sin borrarla.
+        Tarjetas visibles en la portada. Desmarca &quot;Publicado&quot; para ocultar una salida sin eliminarla.
       </p>
       <div className="mt-6">
         <ToursManager tours={data ?? []} />

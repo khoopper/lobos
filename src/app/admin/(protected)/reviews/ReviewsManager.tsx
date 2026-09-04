@@ -12,7 +12,7 @@ export interface ReviewRow {
   is_published: boolean;
 }
 
-const inputCls = "h-10 rounded-lg border border-[#69727d] bg-white px-3 text-[15px] text-[#1f2124]";
+const inputCls = "admin-input h-10 px-3";
 const EMPTY: Omit<ReviewRow, "id"> = {
   author: "",
   review_date: new Date().toISOString().slice(0, 10),
@@ -63,10 +63,10 @@ function ReviewEditor({
   }
 
   return (
-    <div className="flex flex-col gap-3 rounded-xl bg-white p-6 shadow">
-      <div className="flex gap-3">
+    <div className="admin-card flex flex-col gap-3 p-5 sm:p-6">
+      <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_180px_100px]">
         <input
-          className={inputCls + " flex-1"}
+          className={inputCls}
           placeholder="Nombre del cliente"
           value={form.author}
           onChange={(e) => setForm((f) => ({ ...f, author: e.target.value }))}
@@ -127,7 +127,7 @@ export function ReviewsManager({ reviews: initial }: { reviews: ReviewRow[] }) {
   const [reviews, setReviews] = useState(initial);
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="mx-auto flex max-w-4xl flex-col gap-5">
       {reviews.map((review) => (
         <ReviewEditor
           key={review.id}

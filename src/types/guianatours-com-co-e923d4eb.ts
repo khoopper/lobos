@@ -1,6 +1,5 @@
 /**
- * Content contracts for the guianatours.com.co clone.
- * site-key: guianatours-com-co-e923d4eb
+ * Public content contracts for Club de Lobos.
  */
 
 export interface HeroSlide {

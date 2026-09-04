@@ -5,7 +5,7 @@ import { ImageUploader } from "@/components/admin/ImageUploader";
 import { updateContentBlock } from "./actions";
 import type { CampingBlock, FotografiasBlock, GuiasBlock } from "@/lib/queries/site-content";
 
-const inputCls = "h-10 rounded-lg border border-[#69727d] bg-white px-3 text-[15px] text-[#1f2124]";
+const inputCls = "admin-input h-10 px-3";
 
 function SaveBar({ pending, message, onSave }: { pending: boolean; message: string | null; onSave: () => void }) {
   return (
@@ -31,8 +31,8 @@ function GuiasEditor({ initial }: { initial: GuiasBlock }) {
   }
 
   return (
-    <section className="flex flex-col gap-4 rounded-xl bg-white p-6 shadow">
-      <h2 className="text-lg font-bold text-[var(--gn-palette-3)]">Guías expertos locales</h2>
+    <section className="admin-card flex flex-col gap-4 p-5 sm:p-6">
+      <h2 className="text-lg font-bold text-[var(--gn-palette-3)]">Aventuras y destinos</h2>
       <input
         className={inputCls}
         placeholder="Título"
@@ -51,7 +51,7 @@ function GuiasEditor({ initial }: { initial: GuiasBlock }) {
         value={form.buttonHref}
         onChange={(e) => setForm((f) => ({ ...f, buttonHref: e.target.value }))}
       />
-      <div className="flex gap-6">
+      <div className="grid grid-cols-2 gap-4">
         {[0, 1].map((i) => (
           <ImageUploader
             key={i}
@@ -65,7 +65,7 @@ function GuiasEditor({ initial }: { initial: GuiasBlock }) {
                 return { ...f, images };
               })
             }
-            previewClassName="h-24 w-32 rounded-lg object-cover"
+            previewClassName="aspect-[4/3] w-full rounded-lg object-cover"
           />
         ))}
       </div>
@@ -87,8 +87,8 @@ function CampingEditor({ initial }: { initial: CampingBlock }) {
   }
 
   return (
-    <section className="flex flex-col gap-4 rounded-xl bg-white p-6 shadow">
-      <h2 className="text-lg font-bold text-[var(--gn-palette-3)]">Camping</h2>
+    <section className="admin-card flex flex-col gap-4 p-5 sm:p-6">
+      <h2 className="text-lg font-bold text-[var(--gn-palette-3)]">Nuestra comunidad</h2>
       <input
         className={inputCls}
         placeholder="Título"
@@ -118,7 +118,7 @@ function CampingEditor({ initial }: { initial: CampingBlock }) {
         label="Foto"
         value={form.image ? { url: form.image.src, width: form.image.width, height: form.image.height } : null}
         onChange={(img) => setForm((f) => ({ ...f, image: { src: img.url, width: img.width, height: img.height } }))}
-        previewClassName="h-32 w-48 rounded-lg object-cover"
+        previewClassName="aspect-[16/8] w-full rounded-lg object-cover"
       />
       <SaveBar pending={pending} message={message} onSave={save} />
     </section>
@@ -138,8 +138,8 @@ function FotografiasEditor({ initial }: { initial: FotografiasBlock }) {
   }
 
   return (
-    <section className="flex flex-col gap-4 rounded-xl bg-white p-6 shadow">
-      <h2 className="text-lg font-bold text-[var(--gn-palette-3)]">Fotografías de la semana</h2>
+    <section className="admin-card flex flex-col gap-4 p-5 sm:p-6 lg:col-span-2">
+      <h2 className="text-lg font-bold text-[var(--gn-palette-3)]">Galería de aventuras</h2>
       <input
         className={inputCls}
         placeholder="Título"
@@ -168,7 +168,7 @@ export function SectionsManager({
   fotografias: FotografiasBlock;
 }) {
   return (
-    <div className="flex max-w-2xl flex-col gap-8">
+    <div className="grid gap-5 lg:grid-cols-2">
       <GuiasEditor initial={guias} />
       <CampingEditor initial={camping} />
       <FotografiasEditor initial={fotografias} />

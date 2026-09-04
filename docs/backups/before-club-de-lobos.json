@@ -1,0 +1,455 @@
+{
+  "createdAt": "2026-09-04T00:15:27.095Z",
+  "data": {
+    "site_settings": [
+      {
+        "id": 1,
+        "logo_header_url": "/sites/guianatours-com-co-e923d4eb/root-8a5edab2/brand/logo-oso.png",
+        "logo_footer_url": "/sites/guianatours-com-co-e923d4eb/root-8a5edab2/brand/logo-blanco.png",
+        "favicon_url": "/sites/guianatours-com-co-e923d4eb/root-8a5edab2/brand/favicon-32.png",
+        "phone_label": "+57 350 225 0680",
+        "phone_href": "tel:350 225 0680",
+        "email": "reservas@guianatours.com.co",
+        "address": null,
+        "social_facebook_url": "https://www.facebook.com/GuiaNatours/",
+        "social_instagram_url": "https://www.instagram.com/guianatours/?hl=en",
+        "social_youtube_url": "https://www.youtube.com/channel/UChPNJPoDs94rJT4uEl8IsfA",
+        "palette_1": "#235652",
+        "palette_2": "#183f3c",
+        "palette_3": "#373435",
+        "palette_5": "#686c6a",
+        "palette_7": "#f4f2be",
+        "palette_8": "#fbfaec",
+        "footer_registro": "Guía Natours S.A.S Registro Nacional de Turismo 213539",
+        "footer_copyright": "© 2026 | Web diseñada por ",
+        "footer_credit_label": "khoopper",
+        "footer_credit_href": null,
+        "updated_at": "2026-09-03T23:10:41.110751+00:00"
+      }
+    ],
+    "nav_links": [
+      {
+        "id": "bad9c107-7c66-4347-8272-23a264098219",
+        "label": "Inicio",
+        "href": "https://guianatours.com.co/",
+        "is_active": true,
+        "sort_order": 0,
+        "created_at": "2026-09-03T22:42:46.974037+00:00"
+      },
+      {
+        "id": "cc449f4d-a8d2-4702-860c-4413b2169f41",
+        "label": "Guía Natours",
+        "href": "https://guianatours.com.co/guia-notours/",
+        "is_active": true,
+        "sort_order": 1,
+        "created_at": "2026-09-03T22:42:46.974037+00:00"
+      },
+      {
+        "id": "9361e8e8-8149-4ffb-b496-042bf9df2c65",
+        "label": "Calendario",
+        "href": "https://guianatours.com.co/calendarios/",
+        "is_active": true,
+        "sort_order": 2,
+        "created_at": "2026-09-03T22:42:46.974037+00:00"
+      },
+      {
+        "id": "b7270bce-c111-4c65-ae8c-0d1b34c8983d",
+        "label": "Próximas salidas",
+        "href": "https://guianatours.com.co/categoria-salidas/nuestros-proximos-destinos/",
+        "is_active": true,
+        "sort_order": 3,
+        "created_at": "2026-09-03T22:42:46.974037+00:00"
+      }
+    ],
+    "hero_slides": [
+      {
+        "id": "9a9063c3-75b1-4043-8359-28381eebc5f5",
+        "image_url": "/sites/guianatours-com-co-e923d4eb/root-8a5edab2/hero/venados-chingaza.jpg",
+        "image_w": 1440,
+        "image_h": 713,
+        "heading": "Venados en Chingaza",
+        "description": "En este mágico recorrido te llevaremos a senderos en páramo y en bosque donde veremos: el embalse, frailejones, aves y con suerte el oso andino.",
+        "button_label": "Mira los próximos destinos",
+        "href": "https://guianatours.com.co/categoria-salidas/nuestros-proximos-destinos/",
+        "sort_order": 0,
+        "is_published": true,
+        "created_at": "2026-09-03T22:42:47.140924+00:00"
+      },
+      {
+        "id": "ed97c633-a22d-4918-af21-544c57312d30",
+        "image_url": "/sites/guianatours-com-co-e923d4eb/root-8a5edab2/hero/cascada-sueve.jpg",
+        "image_w": 1440,
+        "image_h": 713,
+        "heading": "Cascada de Sueva",
+        "description": "La Cascada de Sueva, Nemustén o Churumbelos es una hermosa caída de agua de aproximadamente 50 metros",
+        "button_label": "Mira los próximos destinos",
+        "href": "https://guianatours.com.co/categoria-salidas/nuestros-proximos-destinos/",
+        "sort_order": 1,
+        "is_published": true,
+        "created_at": "2026-09-03T22:42:47.140924+00:00"
+      },
+      {
+        "id": "f0f4256e-2f96-41a3-a8ef-55fcb06bc18c",
+        "image_url": "/sites/guianatours-com-co-e923d4eb/root-8a5edab2/hero/chingaza-nocturna.jpg",
+        "image_w": 1440,
+        "image_h": 713,
+        "heading": "Chingaza Nocturna (Camping, fotografía de estrellas)",
+        "description": "¿Te gustaría acampar en medio del páramo, con venados a tu alrededor y mucha naturaleza?",
+        "button_label": "Mira los próximos destinos",
+        "href": "https://guianatours.com.co/categoria-salidas/nuestros-proximos-destinos/",
+        "sort_order": 2,
+        "is_published": true,
+        "created_at": "2026-09-03T22:42:47.140924+00:00"
+      },
+      {
+        "id": "48307d8b-72c4-448f-82a4-3bd9645decdd",
+        "image_url": "/sites/guianatours-com-co-e923d4eb/root-8a5edab2/hero/laguna-de-siecha.jpg",
+        "image_w": 1440,
+        "image_h": 713,
+        "heading": "Laguna de Siecha",
+        "description": "Haremos una de las caminatas que realizaron nuestros antepasados hasta llegar a las Lagunas Sagradas de Siecha.",
+        "button_label": "Mira los próximos destinos",
+        "href": "https://guianatours.com.co/categoria-salidas/nuestros-proximos-destinos/",
+        "sort_order": 3,
+        "is_published": true,
+        "created_at": "2026-09-03T22:42:47.140924+00:00"
+      }
+    ],
+    "tours": [
+      {
+        "id": "fb9bd87e-0f01-4436-9dfb-dcd55eea3b53",
+        "slug": "tour-farallones-sutatausa",
+        "title": "Farallones de Sutatausa",
+        "price": "169.000",
+        "currency_symbol": "$",
+        "departure_start": "2026-09-12",
+        "departure_end": null,
+        "image_url": "/sites/guianatours-com-co-e923d4eb/root-8a5edab2/products/farallones-sutatausa.jpg",
+        "image_w": 600,
+        "image_h": 360,
+        "hover_image_url": "/sites/guianatours-com-co-e923d4eb/root-8a5edab2/products/farallones-sutatausa-hover.jpg",
+        "hover_image_w": 600,
+        "hover_image_h": 360,
+        "button_label": "Ver salida",
+        "sort_order": 0,
+        "is_published": true,
+        "created_at": "2026-09-03T22:42:47.486941+00:00"
+      },
+      {
+        "id": "0ba53a29-24f1-4657-9725-548285f92727",
+        "slug": "tour-lagunas-siecha",
+        "title": "Lagunas de Siecha",
+        "price": "199.000",
+        "currency_symbol": "$",
+        "departure_start": "2026-09-12",
+        "departure_end": null,
+        "image_url": "/sites/guianatours-com-co-e923d4eb/root-8a5edab2/products/lagunas-de-siecha.jpg",
+        "image_w": 600,
+        "image_h": 360,
+        "hover_image_url": "/sites/guianatours-com-co-e923d4eb/root-8a5edab2/products/lagunas-de-siecha-hover.jpg",
+        "hover_image_w": 600,
+        "hover_image_h": 360,
+        "button_label": "Ver salida",
+        "sort_order": 1,
+        "is_published": true,
+        "created_at": "2026-09-03T22:42:47.486941+00:00"
+      },
+      {
+        "id": "55ac2ed4-edfa-4607-b279-20f8a4a46485",
+        "slug": "tour-tatacoa",
+        "title": "Desierto de la Tatacoa (2 días)",
+        "price": "599.000",
+        "currency_symbol": "$",
+        "departure_start": "2026-09-19",
+        "departure_end": "2026-09-20",
+        "image_url": "/sites/guianatours-com-co-e923d4eb/root-8a5edab2/products/tatacoa.png",
+        "image_w": 600,
+        "image_h": 360,
+        "hover_image_url": "/sites/guianatours-com-co-e923d4eb/root-8a5edab2/products/tatacoa-hover.png",
+        "hover_image_w": 600,
+        "hover_image_h": 360,
+        "button_label": "Ver salida",
+        "sort_order": 2,
+        "is_published": true,
+        "created_at": "2026-09-03T22:42:47.486941+00:00"
+      },
+      {
+        "id": "bdbf1cf3-ef9f-4f8a-95b2-8855e24dff07",
+        "slug": "tour-chingaza-kids",
+        "title": "Chingaza kids «Venaditos»",
+        "price": "179.000",
+        "currency_symbol": "$",
+        "departure_start": "2026-09-19",
+        "departure_end": null,
+        "image_url": "/sites/guianatours-com-co-e923d4eb/root-8a5edab2/products/chingaza-kids.jpg",
+        "image_w": 600,
+        "image_h": 360,
+        "hover_image_url": "/sites/guianatours-com-co-e923d4eb/root-8a5edab2/products/chingaza-kids-hover.jpg",
+        "hover_image_w": 600,
+        "hover_image_h": 360,
+        "button_label": "Ver salida",
+        "sort_order": 3,
+        "is_published": true,
+        "created_at": "2026-09-03T22:42:47.486941+00:00"
+      },
+      {
+        "id": "40031a1c-70f6-4ab6-bb28-0f726cad5ed7",
+        "slug": "tour-camping-chingaza",
+        "title": "Camping en Chingaza",
+        "price": "359.000",
+        "currency_symbol": "$",
+        "departure_start": "2026-09-19",
+        "departure_end": "2026-09-20",
+        "image_url": "/sites/guianatours-com-co-e923d4eb/root-8a5edab2/products/camping-chingaza.jpg",
+        "image_w": 600,
+        "image_h": 360,
+        "hover_image_url": "/sites/guianatours-com-co-e923d4eb/root-8a5edab2/products/camping-chingaza-hover.jpg",
+        "hover_image_w": 600,
+        "hover_image_h": 360,
+        "button_label": "Ver salida",
+        "sort_order": 4,
+        "is_published": true,
+        "created_at": "2026-09-03T22:42:47.486941+00:00"
+      },
+      {
+        "id": "2a915c46-51e2-4527-8608-dfd5a994b7c4",
+        "slug": "tour-penas-blancas",
+        "title": "Peñas Blancas Chingaza",
+        "price": "189.000",
+        "currency_symbol": "$",
+        "departure_start": "2026-09-20",
+        "departure_end": null,
+        "image_url": "/sites/guianatours-com-co-e923d4eb/root-8a5edab2/products/penas-blancas.png",
+        "image_w": 600,
+        "image_h": 360,
+        "hover_image_url": "/sites/guianatours-com-co-e923d4eb/root-8a5edab2/products/penas-blancas-hover.png",
+        "hover_image_w": 600,
+        "hover_image_h": 360,
+        "button_label": "Ver salida",
+        "sort_order": 5,
+        "is_published": true,
+        "created_at": "2026-09-03T22:42:47.486941+00:00"
+      }
+    ],
+    "content_blocks": [
+      {
+        "key": "guias",
+        "data": {
+          "images": [
+            {
+              "src": "/sites/guianatours-com-co-e923d4eb/root-8a5edab2/guias/guia-natours.jpg",
+              "width": 439,
+              "height": 373
+            },
+            {
+              "src": "/sites/guianatours-com-co-e923d4eb/root-8a5edab2/guias/caminata-natural.jpg",
+              "width": 446,
+              "height": 373
+            }
+          ],
+          "heading": "Guías expertos locales",
+          "buttonHref": "https://guianatours.com.co/categoria-salidas/nuestros-proximos-destinos/",
+          "buttonLabel": "Mira las próximas salidas"
+        },
+        "updated_at": "2026-09-03T22:42:47.656315+00:00"
+      },
+      {
+        "key": "camping",
+        "data": {
+          "body": "Si quieres acampar en Chingaza con venados, en el páramo, con buenas instalaciones y aparte ver un cielo nocturno lleno de estrellas , te llevamos al interior del Parque.",
+          "image": {
+            "src": "/sites/guianatours-com-co-e923d4eb/root-8a5edab2/camping/1024.jpg",
+            "width": 1024,
+            "height": 1024
+          },
+          "heading": "Camping",
+          "buttonHref": "https://guianatours.com.co/categoria-salidas/nuestros-proximos-destinos/",
+          "buttonLabel": "Mira los próximos destinos"
+        },
+        "updated_at": "2026-09-03T22:42:47.656315+00:00"
+      },
+      {
+        "key": "fotografias",
+        "data": {
+          "body": "Si quieres acampar en Chingaza con venados, en el páramo, con buenas instalaciones y aparte ver un cielo nocturno lleno de estrellas , te llevamos al interior del Parque.",
+          "heading": "Fotografías de la semana"
+        },
+        "updated_at": "2026-09-03T22:42:47.656315+00:00"
+      }
+    ],
+    "gallery_items": [
+      {
+        "id": "09f0ad01-b4ae-4fe5-96e8-91e988f37b1c",
+        "image_url": "/sites/guianatours-com-co-e923d4eb/root-8a5edab2/gallery/dsc-4263.png",
+        "image_w": 300,
+        "image_h": 200,
+        "title": "DSC_4263",
+        "sort_order": 0,
+        "is_published": true,
+        "created_at": "2026-09-03T22:42:47.825484+00:00"
+      },
+      {
+        "id": "aa7edaf2-1dc0-495e-9ca0-878fcdcd1832",
+        "image_url": "/sites/guianatours-com-co-e923d4eb/root-8a5edab2/gallery/1.jpg",
+        "image_w": 300,
+        "image_h": 202,
+        "title": "1",
+        "sort_order": 1,
+        "is_published": true,
+        "created_at": "2026-09-03T22:42:47.825484+00:00"
+      },
+      {
+        "id": "ed5000d9-d013-43fc-aca6-b8b49296b2d4",
+        "image_url": "/sites/guianatours-com-co-e923d4eb/root-8a5edab2/gallery/dsc-0452.jpg",
+        "image_w": 300,
+        "image_h": 200,
+        "title": "siecha",
+        "sort_order": 2,
+        "is_published": true,
+        "created_at": "2026-09-03T22:42:47.825484+00:00"
+      },
+      {
+        "id": "b7b29418-0463-4fcd-92e6-7beb3ba905a0",
+        "image_url": "/sites/guianatours-com-co-e923d4eb/root-8a5edab2/gallery/camping.jpg",
+        "image_w": 300,
+        "image_h": 300,
+        "title": "camping",
+        "sort_order": 3,
+        "is_published": true,
+        "created_at": "2026-09-03T22:42:47.825484+00:00"
+      },
+      {
+        "id": "0abd3b0b-515b-494f-9f6d-136f380ba9e4",
+        "image_url": "/sites/guianatours-com-co-e923d4eb/root-8a5edab2/gallery/chingaza-nocturna.jpeg",
+        "image_w": 200,
+        "image_h": 300,
+        "title": "chingaza nocturna",
+        "sort_order": 4,
+        "is_published": true,
+        "created_at": "2026-09-03T22:42:47.825484+00:00"
+      },
+      {
+        "id": "3fff2d99-c5e2-4caa-a6b5-5aed0664e513",
+        "image_url": "/sites/guianatours-com-co-e923d4eb/root-8a5edab2/gallery/chingaza-kids.jpeg",
+        "image_w": 200,
+        "image_h": 300,
+        "title": "chingaza.kids",
+        "sort_order": 5,
+        "is_published": true,
+        "created_at": "2026-09-03T22:42:47.825484+00:00"
+      },
+      {
+        "id": "bff0e7cb-7f3c-4836-9f7f-b961f017b0d3",
+        "image_url": "/sites/guianatours-com-co-e923d4eb/root-8a5edab2/gallery/farallones.jpeg",
+        "image_w": 300,
+        "image_h": 200,
+        "title": "farallones",
+        "sort_order": 6,
+        "is_published": true,
+        "created_at": "2026-09-03T22:42:47.825484+00:00"
+      },
+      {
+        "id": "6324c798-1a4f-4e68-b885-72f53d5045cf",
+        "image_url": "/sites/guianatours-com-co-e923d4eb/root-8a5edab2/gallery/kids.jpeg",
+        "image_w": 203,
+        "image_h": 300,
+        "title": "kids",
+        "sort_order": 7,
+        "is_published": true,
+        "created_at": "2026-09-03T22:42:47.825484+00:00"
+      },
+      {
+        "id": "e5241649-682f-4aaa-89a2-9a99576ca7d9",
+        "image_url": "/sites/guianatours-com-co-e923d4eb/root-8a5edab2/gallery/siecha.jpeg",
+        "image_w": 300,
+        "image_h": 200,
+        "title": "siecha",
+        "sort_order": 8,
+        "is_published": true,
+        "created_at": "2026-09-03T22:42:47.825484+00:00"
+      },
+      {
+        "id": "ab38712d-ff28-4925-8fdd-f3b11c8c3e0e",
+        "image_url": "/sites/guianatours-com-co-e923d4eb/root-8a5edab2/gallery/sueva.jpeg",
+        "image_w": 300,
+        "image_h": 215,
+        "title": "sueva",
+        "sort_order": 9,
+        "is_published": true,
+        "created_at": "2026-09-03T22:42:47.825484+00:00"
+      },
+      {
+        "id": "9af464ac-c9e8-45ab-af86-8f9a1b02471a",
+        "image_url": "/sites/guianatours-com-co-e923d4eb/root-8a5edab2/gallery/venados.jpeg",
+        "image_w": 300,
+        "image_h": 200,
+        "title": "venados",
+        "sort_order": 10,
+        "is_published": true,
+        "created_at": "2026-09-03T22:42:47.825484+00:00"
+      }
+    ],
+    "reviews": [
+      {
+        "id": "4d15e8ae-04f6-4a75-a957-11d367ee70ee",
+        "author": "Manuel Nacho",
+        "review_date": "2022-02-03",
+        "rating": 5,
+        "body_text": "El Parque Natural es un lugar completamente mágico. Poder recorrer un páramo y luego un bosque alto Andino es un privilegio natural que tenemos cerca a Bogotá.Lo único que tendrían que implementar sería que en la charla de inducción en Piedras Gordas tuvieran al menos los vídeos subtitulados en inglés para los visitantes extranjeros.",
+        "sort_order": 0,
+        "is_published": true,
+        "created_at": "2026-09-03T22:42:47.986883+00:00"
+      },
+      {
+        "id": "7b5da9fa-afef-4f2d-a462-b3a8de388d7e",
+        "author": "wilber cifuentes ruiz",
+        "review_date": "2022-01-31",
+        "rating": 5,
+        "body_text": "Hermoso lugar",
+        "sort_order": 1,
+        "is_published": true,
+        "created_at": "2026-09-03T22:42:47.986883+00:00"
+      },
+      {
+        "id": "298ed8d3-5bfb-41c2-b1d8-3118a1ae9cf3",
+        "author": "Sergio Velasquez",
+        "review_date": "2022-01-30",
+        "rating": 5,
+        "body_text": "Excelente",
+        "sort_order": 2,
+        "is_published": true,
+        "created_at": "2026-09-03T22:42:47.986883+00:00"
+      },
+      {
+        "id": "65240ee9-7562-49cc-b81c-64deb6d8bf84",
+        "author": "Luis Sabogal",
+        "review_date": "2022-01-24",
+        "rating": 5,
+        "body_text": "Es un paisaje fuera de lo comun",
+        "sort_order": 3,
+        "is_published": true,
+        "created_at": "2026-09-03T22:42:47.986883+00:00"
+      },
+      {
+        "id": "3054a825-5ce2-45d3-8cb2-05a46a7af610",
+        "author": "LaMolina Chiquita",
+        "review_date": "2022-01-22",
+        "rating": 5,
+        "body_text": "Un lugar lleno de vida y paz... En un lugar cin increíbles paisajes",
+        "sort_order": 4,
+        "is_published": true,
+        "created_at": "2026-09-03T22:42:47.986883+00:00"
+      },
+      {
+        "id": "46a9a2a4-5be8-4408-a67e-bb3636b87f09",
+        "author": "Luz Elena Martinez Martinez",
+        "review_date": "2022-01-21",
+        "rating": 5,
+        "body_text": "Genial",
+        "sort_order": 5,
+        "is_published": true,
+        "created_at": "2026-09-03T22:42:47.986883+00:00"
+      }
+    ]
+  }
+}

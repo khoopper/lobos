@@ -2,55 +2,29 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { cn } from "@/lib/utils";
-import {
-  CloseIcon,
-  FacebookIcon,
-  InstagramIcon,
-  MenuIcon,
-  PhoneAltIcon,
-  ShoppingCartIcon,
-  YoutubeIcon,
-} from "@/components/sites/guianatours-com-co-e923d4eb/shared/icons";
+import { CloseIcon, FacebookIcon, InstagramIcon, MenuIcon, PhoneAltIcon, YoutubeIcon } from "@/components/sites/guianatours-com-co-e923d4eb/shared/icons";
 import type { NavLink, SocialLink } from "@/types/guianatours-com-co-e923d4eb";
-import { ASSETS } from "./content";
 
-const CART_HREF = "https://guianatours.com.co/carrito/";
-const HOME_HREF = "https://guianatours.com.co/";
+const SOCIAL_GLYPH = { facebook: FacebookIcon, instagram: InstagramIcon, youtube: YoutubeIcon } as const;
 
-const SOCIAL_GLYPH = {
-  facebook: FacebookIcon,
-  instagram: InstagramIcon,
-  youtube: YoutubeIcon,
-} as const;
-
-function Logo({ className, logoUrl }: { className?: string; logoUrl: string | null }) {
-  return (
-    <a href={HOME_HREF} aria-label="Guía Natours" className={className}>
-      <Image
-        src={logoUrl ?? `${ASSETS}/brand/logo-oso.png`}
-        alt="Guía Natours"
-        width={320}
-        height={266}
-        priority
-        className="block h-auto w-[92px] max-[1024px]:w-[90px]"
-      />
-    </a>
-  );
+function isExternal(href: string) {
+  return /^https?:\/\//.test(href);
 }
 
-function CartButton({ className }: { className?: string }) {
+function Logo({ logoUrl, className }: { logoUrl: string | null; className?: string }) {
   return (
-    <a
-      href={CART_HREF}
-      aria-label="Carrito de la compra"
-      className={cn("relative flex items-center text-white", className)}
-    >
-      <ShoppingCartIcon className="h-6 w-6" />
-      <span className="absolute -right-1.5 -top-2 flex h-[15px] min-w-[15px] items-center justify-center rounded-full bg-[var(--gn-palette-1)] px-1 text-[10px] leading-none text-white">
-        0
-      </span>
-    </a>
+    <Link href="/" aria-label="Club de Lobos — Inicio" className={cn("block shrink-0", className)}>
+      <Image
+        src={logoUrl ?? "/brand/lobos/logo-white-640.png"}
+        alt="Club de Lobos"
+        width={640}
+        height={640}
+        priority
+        className="h-[78px] w-[78px] object-contain drop-shadow-[0_2px_8px_rgba(0,0,0,.25)] max-md:h-16 max-md:w-16"
+      />
+    </Link>
   );
 }
 
@@ -67,142 +41,82 @@ export function SiteHeader({ navLinks, socialLinks, phoneLabel, phoneHref, logoU
 
   useEffect(() => {
     if (!drawerOpen) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setDrawerOpen(false);
-    };
+    const onKey = (event: KeyboardEvent) => event.key === "Escape" && setDrawerOpen(false);
     document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = "";
+    };
   }, [drawerOpen]);
 
   return (
-    <header className="absolute inset-x-0 top-0 z-[100] bg-transparent">
-      {/* ---------- desktop header (>=1025px) ---------- */}
-      <div className="hidden min-[1025px]:block">
-        {/* row 1 — logo / contact / social */}
-        <div className="h-[83.47px]">
-          <div className="mx-auto flex h-full max-w-[1140px] items-start justify-between px-5">
-            <Logo className="block" logoUrl={logoUrl} />
-            <div className="flex items-start justify-end">
-              <a
-                href={phoneHref}
-                className="mx-[5.1px] mt-[10.2px] flex h-[27.19px] items-center text-[17px] leading-[27.2px] font-normal text-white transition-[color] duration-100 ease-linear"
-              >
-                <PhoneAltIcon className="mr-[6px] h-[17px] w-[17px]" />
-                <span>{phoneLabel}</span>
-              </a>
-              {socialLinks.map((social) => {
-                const Glyph = SOCIAL_GLYPH[social.network];
-                return (
-                  <a
-                    key={social.network}
-                    href={social.href}
-                    aria-label={social.label}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="mx-[2.55px] mt-[5.1px] flex h-[34px] w-[34px] items-center justify-center rounded-[50px] bg-white text-[var(--gn-palette-1)] transition-all duration-200 ease-in-out"
-                  >
-                    <Glyph className="h-[17px] w-[17px]" />
-                  </a>
-                );
-              })}
-            </div>
-          </div>
-        </div>
+    <header className="absolute inset-x-0 top-0 z-[100] border-b border-white/15 bg-gradient-to-b from-black/65 to-transparent text-white">
+      <div className="mx-auto flex h-[108px] max-w-[1220px] items-center gap-8 px-6 max-md:h-[84px] max-md:px-4">
+        <Logo logoUrl={logoUrl} />
 
-        {/* row 2 — primary navigation + cart */}
-        <div className="h-[50px]">
-          <div className="mx-auto flex h-full max-w-[1140px] items-center justify-between px-5">
-            <div aria-hidden="true" />
-            <div className="flex items-center">
-              <nav aria-label="Menú principal">
-                <ul className="flex items-center">
-                  {navLinks.map((link) => (
-                    <li key={link.id}>
-                      <a
-                        href={link.href}
-                        aria-current={link.active ? "page" : undefined}
-                        className={cn(
-                          "block p-[10.2px] text-[17px] leading-[27.2px] font-normal transition-colors duration-200 ease-in-out hover:text-[var(--gn-palette-7)]",
-                          link.active ? "text-[var(--gn-palette-7)]" : "text-white",
-                        )}
-                      >
-                        {link.label}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </nav>
-              <CartButton className="pl-[17px] pt-[3.4px]" />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* ---------- mobile header (<=1024px) ---------- */}
-      <div className="min-[1025px]:hidden">
-        <div className="flex h-[92px] items-center justify-between px-[5px] max-[767px]:h-[92px] min-[768px]:h-[75px] min-[768px]:px-5">
-          <Logo className="block" logoUrl={logoUrl} />
-          <div className="flex items-center gap-[10px]">
-            <CartButton />
-            <button
-              type="button"
-              id="mobile-toggle"
-              aria-label="Abrir menú"
-              aria-expanded={drawerOpen}
-              onClick={() => setDrawerOpen(true)}
-              className="flex h-[41.19px] w-[46.78px] items-center justify-center rounded-lg bg-white/[0.03] px-[8.4px] py-[5.6px] text-white"
+        <nav aria-label="Navegación principal" className="hidden min-w-0 flex-1 items-center justify-center gap-7 lg:flex">
+          {navLinks.map((link) => (
+            <a
+              key={link.id}
+              href={link.href}
+              target={isExternal(link.href) ? "_blank" : undefined}
+              rel={isExternal(link.href) ? "noopener noreferrer" : undefined}
+              className="whitespace-nowrap text-sm font-semibold tracking-wide text-white/90 transition-colors hover:text-[var(--gn-palette-7)]"
             >
-              <MenuIcon className="h-6 w-6" />
-            </button>
-          </div>
+              {link.label}
+            </a>
+          ))}
+        </nav>
+
+        <div className="ml-auto hidden items-center gap-3 lg:flex">
+          <a href={phoneHref} className="flex items-center gap-2 text-xs font-semibold text-white transition-colors hover:text-[var(--gn-palette-7)]">
+            <PhoneAltIcon className="h-4 w-4" />
+            <span>{phoneLabel}</span>
+          </a>
+          {socialLinks.map((social) => {
+            const Glyph = SOCIAL_GLYPH[social.network];
+            return (
+              <a key={social.network} href={social.href} target="_blank" rel="noopener noreferrer" aria-label={social.label} className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-[var(--gn-palette-1)] transition-transform hover:-translate-y-0.5">
+                <Glyph className="h-[17px] w-[17px]" />
+              </a>
+            );
+          })}
         </div>
+
+        <button type="button" onClick={() => setDrawerOpen(true)} aria-label="Abrir menú" className="ml-auto flex h-11 w-11 items-center justify-center rounded-full border border-white/30 bg-black/20 lg:hidden">
+          <MenuIcon className="h-6 w-6" />
+        </button>
       </div>
 
-      {/* ---------- mobile drawer ---------- */}
-      <div
-        className={cn(
-          "fixed inset-0 z-[999] transition-opacity duration-300 min-[1025px]:hidden",
-          drawerOpen ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0",
-        )}
-        aria-hidden={!drawerOpen}
-      >
-        <button
-          type="button"
-          aria-label="Cerrar menú"
-          tabIndex={-1}
-          onClick={() => setDrawerOpen(false)}
-          className="absolute inset-0 h-full w-full cursor-default bg-black/50"
-        />
-        <div className="absolute inset-y-0 right-0 flex w-[300px] max-w-[85vw] flex-col bg-[var(--gn-palette-1)] p-6">
-          <button
-            type="button"
-            aria-label="Cerrar menú"
-            onClick={() => setDrawerOpen(false)}
-            className="self-end p-2 text-white"
-          >
-            <CloseIcon className="h-6 w-6" />
+      <div className={cn("fixed inset-0 z-[110] bg-black/55 transition-opacity lg:hidden", drawerOpen ? "opacity-100" : "pointer-events-none opacity-0")} onClick={() => setDrawerOpen(false)} aria-hidden="true" />
+      <aside className={cn("fixed right-0 top-0 z-[120] flex h-dvh w-[min(86vw,360px)] flex-col bg-[var(--gn-palette-2)] p-6 shadow-2xl transition-transform duration-300 lg:hidden", drawerOpen ? "translate-x-0" : "translate-x-full")} aria-hidden={!drawerOpen}>
+        <div className="mb-8 flex items-center justify-between">
+          <span className="text-sm font-bold tracking-[.16em] text-white">CLUB DE LOBOS</span>
+          <button type="button" onClick={() => setDrawerOpen(false)} aria-label="Cerrar menú" className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10">
+            <CloseIcon className="h-5 w-5" />
           </button>
-          <nav aria-label="Menú móvil" className="mt-4">
-            <ul className="flex flex-col">
-              {navLinks.map((link) => (
-                <li key={link.id}>
-                  <a
-                    href={link.href}
-                    onClick={() => setDrawerOpen(false)}
-                    aria-current={link.active ? "page" : undefined}
-                    className={cn(
-                      "block py-3 text-[17px] leading-[27.2px] transition-colors duration-200 ease-in-out hover:text-[var(--gn-palette-7)]",
-                      link.active ? "text-[var(--gn-palette-7)]" : "text-white",
-                    )}
-                  >
-                    {link.label}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </nav>
         </div>
-      </div>
+        <nav aria-label="Navegación móvil" className="flex flex-col">
+          {navLinks.map((link) => (
+            <a key={link.id} href={link.href} target={isExternal(link.href) ? "_blank" : undefined} rel={isExternal(link.href) ? "noopener noreferrer" : undefined} onClick={() => setDrawerOpen(false)} className="border-b border-white/10 py-4 text-base font-semibold text-white">
+              {link.label}
+            </a>
+          ))}
+        </nav>
+        <div className="mt-auto space-y-5 pt-8">
+          <a href={phoneHref} className="flex items-start gap-3 text-sm text-white">
+            <PhoneAltIcon className="mt-0.5 h-4 w-4 shrink-0 text-[var(--gn-palette-7)]" />
+            {phoneLabel}
+          </a>
+          <div className="flex gap-3">
+            {socialLinks.map((social) => {
+              const Glyph = SOCIAL_GLYPH[social.network];
+              return <a key={social.network} href={social.href} target="_blank" rel="noopener noreferrer" aria-label={social.label} className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-[var(--gn-palette-1)]"><Glyph className="h-5 w-5" /></a>;
+            })}
+          </div>
+        </div>
+      </aside>
     </header>
   );
 }
